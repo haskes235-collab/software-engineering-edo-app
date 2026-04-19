@@ -1,24 +1,17 @@
-import { ipcRenderer, contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron';
+import { IPC } from '../src/shared/ipcChannels';
+import { CreateDocumentDto, UpdateDocumentDto } from '../src/shared/types';
 
-// --------- Expose some API to the Renderer process ---------
-contextBridge.exposeInMainWorld('ipcRenderer', {
-  on(...args: Parameters<typeof ipcRenderer.on>) {
-    const [channel, listener] = args
-    return ipcRenderer.on(channel, (event, ...args) => listener(event, ...args))
+contextBridge.exposeInMainWorld('electronAPI', {
+  documents: {
+    getAll: () => ipcRenderer.invoke(IPC.DOCUMENTS.GET_ALL),
+    getById: (id: string) => ipcRenderer.invoke(IPC.DOCUMENTS.GET_BY_ID, id),
+    create: (dto: CreateDocumentDto) =>
+      ipcRenderer.invoke(IPC.DOCUMENTS.CREATE, dto),
+    update: (id: string, dto: UpdateDocumentDto) =>
+      ipcRenderer.invoke(IPC.DOCUMENTS.UPDATE, id, dto),
+    delete: (id: string) => ipcRenderer.invoke(IPC.DOCUMENTS.DELETE, id),
+    getVersions: (id: string) =>
+      ipcRenderer.invoke(IPC.DOCUMENTS.GET_VERSIONS, id),
   },
-  off(...args: Parameters<typeof ipcRenderer.off>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.off(channel, ...omit)
-  },
-  send(...args: Parameters<typeof ipcRenderer.send>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.send(channel, ...omit)
-  },
-  invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.invoke(channel, ...omit)
-  },
-
-  // You can expose other APTs you need here.
-  // ...
-})
+});

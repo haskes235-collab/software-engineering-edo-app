@@ -1,68 +1,84 @@
-import { app, BrowserWindow } from 'electron'
-import { createRequire } from 'node:module'
-import { fileURLToPath } from 'node:url'
-import path from 'node:path'
+import { app, BrowserWindow, ipcMain } from 'electron';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+import { IPC } from '../src/shared/ipcChannels';
+import { initDatabase, closeDatabase } from '../src/main/db/database';
+import { DocumentRepository } from '../src/main/repositories/DocumentRepository';
+import { DocumentService } from '../src/main/services/DocumentService';
+import { CreateDocumentDto, UpdateDocumentDto } from '../src/shared/types';
 
-const require = createRequire(import.meta.url)
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// The built directory structure
-//
-// ├─┬─┬ dist
-// │ │ └── index.html
-// │ │
-// │ ├─┬ dist-electron
-// │ │ ├── main.js
-// │ │ └── preload.mjs
-// │
-process.env.APP_ROOT = path.join(__dirname, '..')
+process.env.APP_ROOT = path.join(__dirname, '..');
 
-// 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
-export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
-export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron')
-export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
+export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL'];
+export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron');
+export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist');
 
-process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
+process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
+  ? path.join(process.env.APP_ROOT, 'public')
+  : RENDERER_DIST;
 
-let win: BrowserWindow | null
+let win: BrowserWindow | null;
 
-function createWindow() {
+function createWindow(): void {
   win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    width: 1200,
+    height: 800,
     webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
       preload: path.join(__dirname, 'preload.mjs'),
     },
-  })
-
-  // Test active push message to Renderer-process.
-  win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', (new Date).toLocaleString())
-  })
+  });
 
   if (VITE_DEV_SERVER_URL) {
-    win.loadURL(VITE_DEV_SERVER_URL)
+    win.loadURL(VITE_DEV_SERVER_URL);
   } else {
-    // win.loadFile('dist/index.html')
-    win.loadFile(path.join(RENDERER_DIST, 'index.html'))
+    win.loadFile(path.join(RENDERER_DIST, 'index.html'));
   }
 }
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+async function registerIpcHandlers(): Promise<void> {
+  const db = await initDatabase();
+  const repository = new DocumentRepository(db);
+  const service = new DocumentService(repository);
+
+  ipcMain.handle(IPC.DOCUMENTS.GET_ALL, () => service.getAllDocuments());
+  ipcMain.handle(IPC.DOCUMENTS.GET_BY_ID, (_, id: string) =>
+    service.getDocumentById(id),
+  );
+  ipcMain.handle(IPC.DOCUMENTS.CREATE, (_, dto: CreateDocumentDto) =>
+    service.createDocument(dto),
+  );
+  ipcMain.handle(
+    IPC.DOCUMENTS.UPDATE,
+    (_, id: string, dto: UpdateDocumentDto) => service.updateDocument(id, dto),
+  );
+  ipcMain.handle(IPC.DOCUMENTS.DELETE, (_, id: string) =>
+    service.deleteDocument(id),
+  );
+  ipcMain.handle(IPC.DOCUMENTS.GET_VERSIONS, (_, id: string) =>
+    service.getDocumentVersions(id),
+  );
+}
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    app.quit()
-    win = null
+    app.quit();
+    win = null;
   }
-})
+});
 
 app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow()
+    createWindow();
   }
-})
+});
 
-app.whenReady().then(createWindow)
+app.whenReady().then(async () => {
+  await registerIpcHandlers();
+  createWindow();
+});
+
+app.on('will-quit', () => closeDatabase());
