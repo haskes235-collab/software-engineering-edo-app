@@ -1,0 +1,57 @@
+.version-history {
+  margin-top: 24px;
+}
+
+.version-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.version-history-header h3 {
+  margin: 0;
+  color: #111827;
+}
+
+.sort-btn {
+  padding: 6px 12px;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.sort-btn:hover {
+  background-color: #e5e7eb;
+}
+
+.version-row {
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.version-row:hover {
+  background-color: #f3f4f6;
+}
+
+.version-row td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.version-history-empty {
+  padding: 40px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.version-viewer {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 6px;
+  color: #6b7280;
+  text-align: center;
+}

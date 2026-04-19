@@ -1,0 +1,83 @@
+.document-list-item {
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.document-list-item:hover {
+  background-color: #f3f4f6;
+}
+
+.document-list-item td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.document-list-item td:first-child {
+  font-weight: 500;
+}
+
+.document-list-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.new-document-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.new-document-btn:hover {
+  background-color: #2563eb;
+}
+
+.filter-container {
+  margin-bottom: 16px;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+}
+
+.loading, .error, .empty {
+  padding: 40px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.error {
+  color: #ef4444;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+thead {
+  background-color: #f9fafb;
+}
+
+th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+}

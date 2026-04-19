@@ -1,0 +1,100 @@
+.document-editor {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.document-editor h2 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  color: #111827;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 200px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.form-actions button {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.form-actions button[type="button"] {
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.form-actions button[type="button"]:hover {
+  background-color: #e5e7eb;
+}
+
+.form-actions button[type="submit"] {
+  background-color: #3b82f6;
+  border: none;
+  color: white;
+}
+
+.form-actions button[type="submit"]:hover {
+  background-color: #2563eb;
+}
+
+.form-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.validation-errors {
+  margin-bottom: 16px;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
