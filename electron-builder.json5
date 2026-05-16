@@ -3,13 +3,18 @@
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
   "appId": "YourAppID",
   "asar": true,
+  "asarUnpack": [
+    "node_modules/**/*.node"
+  ],
   "productName": "YourAppName",
   "directories": {
     "output": "release/${version}"
   },
   "files": [
+    "package.json",
     "dist",
-    "dist-electron"
+    "dist-electron",
+    "node_modules/**/*"
   ],
   "mac": {
     "target": [

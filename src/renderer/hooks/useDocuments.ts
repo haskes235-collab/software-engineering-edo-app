@@ -13,7 +13,7 @@ export function useDocuments() {
       const docs = await window.electronAPI.documents.getAll();
       setDocuments(docs);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : 'Неизвестная ошибка');
     } finally {
       setLoading(false);
     }

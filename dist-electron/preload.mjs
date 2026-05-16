@@ -1,1 +1,22 @@
-"use strict";const n=require("electron"),t={DOCUMENTS:{GET_ALL:"documents:getAll",GET_BY_ID:"documents:getById",CREATE:"documents:create",UPDATE:"documents:update",DELETE:"documents:delete",GET_VERSIONS:"documents:getVersions"}};n.contextBridge.exposeInMainWorld("electronAPI",{documents:{getAll:()=>n.ipcRenderer.invoke(t.DOCUMENTS.GET_ALL),getById:e=>n.ipcRenderer.invoke(t.DOCUMENTS.GET_BY_ID,e),create:e=>n.ipcRenderer.invoke(t.DOCUMENTS.CREATE,e),update:(e,E)=>n.ipcRenderer.invoke(t.DOCUMENTS.UPDATE,e,E),delete:e=>n.ipcRenderer.invoke(t.DOCUMENTS.DELETE,e),getVersions:e=>n.ipcRenderer.invoke(t.DOCUMENTS.GET_VERSIONS,e)}});
+"use strict";
+const electron = require("electron");
+const IPC = {
+  DOCUMENTS: {
+    GET_ALL: "documents:getAll",
+    GET_BY_ID: "documents:getById",
+    CREATE: "documents:create",
+    UPDATE: "documents:update",
+    DELETE: "documents:delete",
+    GET_VERSIONS: "documents:getVersions"
+  }
+};
+electron.contextBridge.exposeInMainWorld("electronAPI", {
+  documents: {
+    getAll: () => electron.ipcRenderer.invoke(IPC.DOCUMENTS.GET_ALL),
+    getById: (id) => electron.ipcRenderer.invoke(IPC.DOCUMENTS.GET_BY_ID, id),
+    create: (dto) => electron.ipcRenderer.invoke(IPC.DOCUMENTS.CREATE, dto),
+    update: (id, dto) => electron.ipcRenderer.invoke(IPC.DOCUMENTS.UPDATE, id, dto),
+    delete: (id) => electron.ipcRenderer.invoke(IPC.DOCUMENTS.DELETE, id),
+    getVersions: (id) => electron.ipcRenderer.invoke(IPC.DOCUMENTS.GET_VERSIONS, id)
+  }
+});

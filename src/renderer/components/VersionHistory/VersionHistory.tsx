@@ -18,48 +18,46 @@ export function VersionHistory({ versions, onVersionClick }: VersionHistoryProps
   });
 
   if (versions.length === 0) {
-    return <div className="version-history-empty">No versions yet</div>;
+    return <div className="version-history-empty">Версий пока нет</div>;
   }
 
   return (
     <div className="version-history">
       <div className="version-history-header">
-        <h3>Version History</h3>
+        <h3>История версий</h3>
         <button
           className="sort-btn"
           onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
         >
-          Sort: {sortOrder === 'desc' ? 'Newest first' : 'Oldest first'}
+          Сортировка: {sortOrder === 'desc' ? 'Сначала новые' : 'Сначала старые'}
         </button>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Version</th>
-            <th>Author</th>
-            <th>Date</th>
-            <th>Change Note</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedVersions.map((version) => (
-            <tr
-              key={version.id}
-              className="version-row"
-              onClick={() => onVersionClick(version)}
-            >
-              <td>v{version.versionNumber}</td>
-              <td>{version.authorName}</td>
-              <td>{formatDateTime(version.createdAt)}</td>
-              <td>{version.changeNote || '-'}</td>
+      <div className="version-table-shell">
+        <table className="version-table">
+          <thead>
+            <tr>
+              <th>Версия</th>
+              <th>Автор</th>
+              <th>Дата</th>
+              <th>Комментарий</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <div className="version-viewer">
-        <h4>Select a version to view its content</h4>
+          </thead>
+          <tbody>
+            {sortedVersions.map((version) => (
+              <tr
+                key={version.id}
+                className="version-row"
+                onClick={() => onVersionClick(version)}
+              >
+                <td>v{version.versionNumber}</td>
+                <td>{version.authorName}</td>
+                <td>{formatDateTime(version.createdAt)}</td>
+                <td>{version.changeNote || '-'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

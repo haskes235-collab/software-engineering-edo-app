@@ -1,57 +1,89 @@
 .version-history {
-  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .version-history-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  gap: 16px;
 }
 
 .version-history-header h3 {
   margin: 0;
-  color: #111827;
+  color: #0f172a;
+  font-size: 1.2rem;
 }
 
 .sort-btn {
-  padding: 6px 12px;
-  background-color: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 13px;
-  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 10px 14px;
+  color: #334155;
+  background: #f8fafc;
 }
 
-.sort-btn:hover {
-  background-color: #e5e7eb;
+.version-table-shell {
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 20px;
+}
+
+.version-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.version-table th,
+.version-table td {
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.version-table th {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: #f8fafc;
 }
 
 .version-row {
   cursor: pointer;
-  transition: background-color 0.15s;
 }
 
 .version-row:hover {
-  background-color: #f3f4f6;
+  background: rgba(14, 116, 144, 0.05);
 }
 
 .version-row td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-top: 1px solid rgba(226, 232, 240, 0.9);
+  color: #1e293b;
 }
 
 .version-history-empty {
-  padding: 40px;
+  padding: 24px;
+  border-radius: 18px;
   text-align: center;
-  color: #6b7280;
+  color: #64748b;
+  background: #f8fafc;
 }
 
-.version-viewer {
-  margin-top: 24px;
-  padding: 16px;
-  background-color: #f9fafb;
-  border-radius: 6px;
-  color: #6b7280;
-  text-align: center;
+@media (max-width: 768px) {
+  .version-history-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .version-table-shell {
+    overflow-x: auto;
+  }
+
+  .version-table {
+    min-width: 640px;
+  }
 }

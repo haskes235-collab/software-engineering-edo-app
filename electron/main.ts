@@ -7,7 +7,8 @@ import { DocumentRepository } from '../src/main/repositories/DocumentRepository'
 import { DocumentService } from '../src/main/services/DocumentService';
 import { CreateDocumentDto, UpdateDocumentDto } from '../src/shared/types';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 process.env.APP_ROOT = path.join(__dirname, '..');
 

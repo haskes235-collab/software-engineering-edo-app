@@ -1,5 +1,5 @@
-import { Database as SqlJsDatabase } from 'sql.js';
 import { v4 as uuidv4 } from 'uuid';
+import { SqliteDatabase } from './types';
 
 const SEED_DOCUMENTS = [
   {
@@ -27,10 +27,8 @@ const SEED_DOCUMENTS = [
   },
 ];
 
-type SaveCallback = () => void;
-
-export function runMigrations(db: SqlJsDatabase, save: SaveCallback): void {
-  db.run(`
+export function runMigrations(db: SqliteDatabase): void {
+  db.exec(`
     CREATE TABLE IF NOT EXISTS documents (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
@@ -43,7 +41,7 @@ export function runMigrations(db: SqlJsDatabase, save: SaveCallback): void {
     )
   `);
 
-  db.run(`
+  db.exec(`
     CREATE TABLE IF NOT EXISTS document_versions (
       id TEXT PRIMARY KEY,
       document_id TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
@@ -57,23 +55,36 @@ export function runMigrations(db: SqlJsDatabase, save: SaveCallback): void {
     )
   `);
 
-  db.run('CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(status)');
-  db.run(
+  db.exec('CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(status)');
+  db.exec(
     'CREATE INDEX IF NOT EXISTS idx_versions_document_id ON document_versions(document_id)',
   );
 
-  const result = db.exec('SELECT COUNT(*) as count FROM documents');
-  const count = result[0]?.values[0]?.[0] as number;
+  const result = db.prepare('SELECT COUNT(*) as count FROM documents').get() as
+    | { count: number }
+    | undefined;
+  const count = result?.count ?? 0;
 
   if (count === 0) {
     const now = new Date().toISOString();
+    const insertDocument = db.prepare<
+      [string, string, string, string, string, string, string, string]
+    >(`
+      INSERT INTO documents (id, title, content, status, author_id, author_name, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
     for (const doc of SEED_DOCUMENTS) {
-      db.run(
-        `INSERT INTO documents (id, title, content, status, author_id, author_name, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [uuidv4(), doc.title, doc.content, doc.status, doc.authorId, doc.authorName, now, now],
+      insertDocument.run(
+        uuidv4(),
+        doc.title,
+        doc.content,
+        doc.status,
+        doc.authorId,
+        doc.authorName,
+        now,
+        now,
       );
     }
-    save();
   }
 }

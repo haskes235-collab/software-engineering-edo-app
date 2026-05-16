@@ -11,15 +11,15 @@
     "db:setup": "node scripts/setup-db.js"
   },
   "dependencies": {
+    "better-sqlite3": "^11.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "sql.js": "^1.10.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
-    "@types/sql.js": "^1.4.11",
     "@types/uuid": "^9.0.7",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",

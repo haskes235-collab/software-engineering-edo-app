@@ -1,4 +1,3 @@
-import { Database as SqlJsDatabase } from 'sql.js';
 import { v4 as uuidv4 } from 'uuid';
 import { IDocumentRepository } from './IDocumentRepository';
 import {
@@ -7,67 +6,171 @@ import {
   CreateDocumentDto,
   UpdateDocumentDto,
 } from '../../shared/types';
-import { saveDatabase } from '../db/database';
+import { SqliteDatabase } from '../db/types';
 
-function rowToDocument(columns: string[], values: unknown[]): Document {
-  const row: Record<string, unknown> = {};
-  columns.forEach((col, i) => {
-    row[col] = values[i];
-  });
+type Statement<BindParameters extends unknown[], Result = unknown> =
+  import('better-sqlite3').Statement<BindParameters, Result>;
+
+type DocumentRow = {
+  id: string;
+  title: string;
+  content: string;
+  status: Document['status'];
+  author_id: string;
+  author_name: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type VersionRow = {
+  id: string;
+  document_id: string;
+  version_number: number;
+  content: string;
+  author_id: string;
+  author_name: string;
+  created_at: string;
+  change_note: string;
+};
+
+type UpdateTransaction = (
+  id: string,
+  existing: Document,
+  dto: UpdateDocumentDto,
+  nextVersion: number,
+  now: string,
+) => void;
+
+function rowToDocument(row: DocumentRow): Document {
   return {
-    id: row['id'] as string,
-    title: row['title'] as string,
-    content: row['content'] as string,
-    status: row['status'] as Document['status'],
-    authorId: row['author_id'] as string,
-    authorName: row['author_name'] as string,
-    createdAt: row['created_at'] as string,
-    updatedAt: row['updated_at'] as string,
+    id: row.id,
+    title: row.title,
+    content: row.content,
+    status: row.status,
+    authorId: row.author_id,
+    authorName: row.author_name,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
-function rowToVersion(columns: string[], values: unknown[]): DocumentVersion {
-  const row: Record<string, unknown> = {};
-  columns.forEach((col, i) => {
-    row[col] = values[i];
-  });
+function rowToVersion(row: VersionRow): DocumentVersion {
   return {
-    id: row['id'] as string,
-    documentId: row['document_id'] as string,
-    versionNumber: row['version_number'] as number,
-    content: row['content'] as string,
-    authorId: row['author_id'] as string,
-    authorName: row['author_name'] as string,
-    createdAt: row['created_at'] as string,
-    changeNote: row['change_note'] as string,
+    id: row.id,
+    documentId: row.document_id,
+    versionNumber: row.version_number,
+    content: row.content,
+    authorId: row.author_id,
+    authorName: row.author_name,
+    createdAt: row.created_at,
+    changeNote: row.change_note,
   };
 }
 
 export class DocumentRepository implements IDocumentRepository {
-  constructor(private readonly db: SqlJsDatabase) {}
+  private readonly findAllStatement: Statement<[], DocumentRow>;
+  private readonly findByIdStatement: Statement<[string], DocumentRow>;
+  private readonly insertDocumentStatement: Statement<
+    [string, string, string, Document['status'], string, string, string, string]
+  >;
+  private readonly insertVersionStatement: Statement<
+    [string, string, number, string, string, string, string, string]
+  >;
+  private readonly updateTitleStatement: Statement<[string, string, string]>;
+  private readonly updateContentStatement: Statement<[string, string, string]>;
+  private readonly touchDocumentStatement: Statement<[string, string]>;
+  private readonly deleteStatement: Statement<[string]>;
+  private readonly findVersionsStatement: Statement<[string], VersionRow>;
+  private readonly getVersionByNumberStatement: Statement<
+    [string, number],
+    VersionRow
+  >;
+  private readonly getNextVersionStatement: Statement<[string], { next: number }>;
+  private readonly performUpdate: UpdateTransaction;
 
-  findAll(): Document[] {
-    const result = this.db.exec(
+  constructor(private readonly db: SqliteDatabase) {
+    this.findAllStatement = this.db.prepare<[], DocumentRow>(
       'SELECT * FROM documents ORDER BY updated_at DESC',
     );
-    if (!result.length) return [];
-    const { columns, values } = result[0];
-    return values.map((row: unknown[]) => rowToDocument(columns, row));
+    this.findByIdStatement = this.db.prepare<[string], DocumentRow>(
+      'SELECT * FROM documents WHERE id = ?',
+    );
+    this.insertDocumentStatement = this.db.prepare<
+      [string, string, string, Document['status'], string, string, string, string]
+    >(`
+      INSERT INTO documents (id, title, content, status, author_id, author_name, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    this.insertVersionStatement = this.db.prepare<
+      [string, string, number, string, string, string, string, string]
+    >(`
+      INSERT INTO document_versions (id, document_id, version_number, content, author_id, author_name, change_note, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    this.updateTitleStatement = this.db.prepare<[string, string, string]>(
+      'UPDATE documents SET title = ?, updated_at = ? WHERE id = ?',
+    );
+    this.updateContentStatement = this.db.prepare<[string, string, string]>(
+      'UPDATE documents SET content = ?, updated_at = ? WHERE id = ?',
+    );
+    this.touchDocumentStatement = this.db.prepare<[string, string]>(
+      'UPDATE documents SET updated_at = ? WHERE id = ?',
+    );
+    this.deleteStatement = this.db.prepare<[string]>(
+      'DELETE FROM documents WHERE id = ?',
+    );
+    this.findVersionsStatement = this.db.prepare<[string], VersionRow>(
+      'SELECT * FROM document_versions WHERE document_id = ? ORDER BY version_number DESC',
+    );
+    this.getVersionByNumberStatement = this.db.prepare<
+      [string, number],
+      VersionRow
+    >(
+      'SELECT * FROM document_versions WHERE document_id = ? AND version_number = ?',
+    );
+    this.getNextVersionStatement = this.db.prepare<[string], { next: number }>(
+      'SELECT COALESCE(MAX(version_number), 0) + 1 AS next FROM document_versions WHERE document_id = ?',
+    );
+    this.performUpdate = this.db.transaction(
+      (
+        id: string,
+        existing: Document,
+        dto: UpdateDocumentDto,
+        nextVersion: number,
+        now: string,
+      ) => {
+        this.insertVersionStatement.run(
+          uuidv4(),
+          id,
+          nextVersion,
+          existing.content,
+          existing.authorId,
+          existing.authorName,
+          dto.changeNote,
+          now,
+        );
+
+        if (dto.title !== undefined) {
+          this.updateTitleStatement.run(dto.title, now, id);
+        }
+        if (dto.content !== undefined) {
+          this.updateContentStatement.run(dto.content, now, id);
+        }
+        if (dto.title === undefined && dto.content === undefined) {
+          this.touchDocumentStatement.run(now, id);
+        }
+      },
+    );
+  }
+
+  findAll(): Document[] {
+    const rows = this.findAllStatement.all();
+    return rows.map(rowToDocument);
   }
 
   findById(id: string): Document | undefined {
-    const stmt = this.db.prepare('SELECT * FROM documents WHERE id = ?');
-    stmt.bind([id]);
-    if (stmt.step()) {
-      const row = stmt.getAsObject();
-      stmt.free();
-      return rowToDocument(
-        Object.keys(row),
-        Object.values(row),
-      );
-    }
-    stmt.free();
-    return undefined;
+    const row = this.findByIdStatement.get(id);
+    return row ? rowToDocument(row) : undefined;
   }
 
   create(dto: CreateDocumentDto): Document {
@@ -83,12 +186,16 @@ export class DocumentRepository implements IDocumentRepository {
       updatedAt: now,
     };
 
-    this.db.run(
-      `INSERT INTO documents (id, title, content, status, author_id, author_name, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [doc.id, doc.title, doc.content, doc.status, doc.authorId, doc.authorName, doc.createdAt, doc.updatedAt],
+    this.insertDocumentStatement.run(
+      doc.id,
+      doc.title,
+      doc.content,
+      doc.status,
+      doc.authorId,
+      doc.authorName,
+      doc.createdAt,
+      doc.updatedAt,
     );
-    saveDatabase();
     return doc;
   }
 
@@ -99,82 +206,30 @@ export class DocumentRepository implements IDocumentRepository {
     const now = new Date().toISOString();
     const nextVersion = this.getNextVersionNumber(id);
 
-    try {
-      this.db.run('BEGIN EXCLUSIVE');
-
-      this.db.run(
-        `INSERT INTO document_versions (id, document_id, version_number, content, author_id, author_name, change_note, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [uuidv4(), id, nextVersion, existing.content, existing.authorId, existing.authorName, dto.changeNote, now],
-      );
-
-      if (dto.title !== undefined) {
-        this.db.run('UPDATE documents SET title = ?, updated_at = ? WHERE id = ?', [dto.title, now, id]);
-      }
-      if (dto.content !== undefined) {
-        this.db.run('UPDATE documents SET content = ?, updated_at = ? WHERE id = ?', [dto.content, now, id]);
-      }
-      if (dto.title === undefined && dto.content === undefined) {
-        this.db.run('UPDATE documents SET updated_at = ? WHERE id = ?', [now, id]);
-      }
-
-      this.db.run('COMMIT');
-      saveDatabase();
-    } catch (e) {
-      this.db.run('ROLLBACK');
-      throw e;
-    }
+    this.performUpdate(id, existing, dto, nextVersion, now);
 
     return this.findById(id)!;
   }
 
   delete(id: string): void {
-    this.db.run('DELETE FROM documents WHERE id = ?', [id]);
-    saveDatabase();
+    this.deleteStatement.run(id);
   }
 
   findVersions(documentId: string): DocumentVersion[] {
-    const stmt = this.db.prepare(
-      `SELECT * FROM document_versions WHERE document_id = ? ORDER BY version_number DESC`,
-    );
-    stmt.bind([documentId]);
-    const versions: DocumentVersion[] = [];
-    while (stmt.step()) {
-      const row = stmt.getAsObject();
-      versions.push(rowToVersion(Object.keys(row), Object.values(row)));
-    }
-    stmt.free();
-    return versions;
+    const rows = this.findVersionsStatement.all(documentId);
+    return rows.map(rowToVersion);
   }
 
   getVersionByNumber(
     documentId: string,
     version: number,
   ): DocumentVersion | undefined {
-    const stmt = this.db.prepare(
-      'SELECT * FROM document_versions WHERE document_id = ? AND version_number = ?',
-    );
-    stmt.bind([documentId, version]);
-    if (stmt.step()) {
-      const row = stmt.getAsObject();
-      stmt.free();
-      return rowToVersion(
-        Object.keys(row),
-        Object.values(row),
-      );
-    }
-    stmt.free();
-    return undefined;
+    const row = this.getVersionByNumberStatement.get(documentId, version);
+    return row ? rowToVersion(row) : undefined;
   }
 
   private getNextVersionNumber(documentId: string): number {
-    const stmt = this.db.prepare(
-      `SELECT COALESCE(MAX(version_number), 0) + 1 AS next FROM document_versions WHERE document_id = ?`,
-    );
-    stmt.bind([documentId]);
-    stmt.step();
-    const row = stmt.getAsObject() as { next: number };
-    stmt.free();
-    return row.next;
+    const row = this.getNextVersionStatement.get(documentId);
+    return row?.next ?? 1;
   }
 }

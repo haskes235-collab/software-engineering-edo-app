@@ -11,7 +11,10 @@ interface DocumentListItemProps {
 export function DocumentListItem({ document, onClick }: DocumentListItemProps) {
   return (
     <tr className="document-list-item" onClick={onClick}>
-      <td>{document.title}</td>
+      <td>
+        {document.title}
+        <span className="document-list-item__meta">Открыть карточку документа</span>
+      </td>
       <td>
         <StatusBadge status={document.status} />
       </td>

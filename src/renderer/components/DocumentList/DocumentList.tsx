@@ -8,7 +8,6 @@ interface DocumentListProps {
   loading: boolean;
   error: string | null;
   onDocumentClick: (id: string) => void;
-  onNewDocument: () => void;
 }
 
 const ALL_STATUSES: DocStatus[] = ['DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'ARCHIVED'];
@@ -18,37 +17,33 @@ export function DocumentList({
   loading,
   error,
   onDocumentClick,
-  onNewDocument,
 }: DocumentListProps) {
   const [statusFilter, setStatusFilter] = useState<DocStatus | 'ALL'>('ALL');
 
   const filteredDocuments = statusFilter === 'ALL'
     ? documents
-    : documents.filter((doc) => doc.status === statusFilter);
+    : documents.filter((document) => document.status === statusFilter);
 
   if (loading) {
-    return <div className="loading">Loading documents...</div>;
+    return <div className="loading">Загрузка документов...</div>;
   }
 
   if (error) {
-    return <div className="error">Error: {error}</div>;
+    return <div className="error">Ошибка: {error}</div>;
   }
 
   return (
-    <div>
-      <div className="document-list-actions">
-        <button className="new-document-btn" onClick={onNewDocument}>
-          New Document
-        </button>
-      </div>
-
-      <div className="filter-container">
+    <div className="document-list">
+      <div className="document-list-controls">
+        <div className="document-list-summary">
+          Найдено документов: {filteredDocuments.length}
+        </div>
         <select
           className="filter-select"
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as DocStatus | 'ALL')}
+          onChange={(event) => setStatusFilter(event.target.value as DocStatus | 'ALL')}
         >
-          <option value="ALL">All statuses</option>
+          <option value="ALL">Все статусы</option>
           {ALL_STATUSES.map((status) => (
             <option key={status} value={status}>
               {status}
@@ -58,27 +53,29 @@ export function DocumentList({
       </div>
 
       {filteredDocuments.length === 0 ? (
-        <div className="empty">No documents found</div>
+        <div className="empty">Документы не найдены</div>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Status</th>
-              <th>Author</th>
-              <th>Created</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredDocuments.map((doc) => (
-              <DocumentListItem
-                key={doc.id}
-                document={doc}
-                onClick={() => onDocumentClick(doc.id)}
-              />
-            ))}
-          </tbody>
-        </table>
+        <div className="list-table-shell">
+          <table className="document-table">
+            <thead>
+              <tr>
+                <th>Название</th>
+                <th>Статус</th>
+                <th>Автор</th>
+                <th>Создан</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredDocuments.map((document) => (
+                <DocumentListItem
+                  key={document.id}
+                  document={document}
+                  onClick={() => onDocumentClick(document.id)}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

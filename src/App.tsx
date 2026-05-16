@@ -1,31 +1,35 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { DocumentsPage } from './renderer/pages/DocumentsPage';
 import { DocumentDetailPage } from './renderer/pages/DocumentDetailPage';
 import './App.css';
 
+type Route = { type: 'list' } | { type: 'detail'; id: string };
+
+function parseRoute(hash: string): Route {
+  const normalizedHash = hash.replace(/^#/, '');
+  if (normalizedHash.startsWith('/document/')) {
+    return { type: 'detail', id: normalizedHash.replace('/document/', '') };
+  }
+  return { type: 'list' };
+}
+
 function App() {
-  const [route, setRoute] = useState<{ type: 'list' } | { type: 'detail'; id: string }>({ type: 'list' });
+  const [route, setRoute] = useState<Route>(() => parseRoute(window.location.hash));
 
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1);
-      if (hash.startsWith('#/document/')) {
-        const id = hash.replace('#/document/', '');
-        setRoute({ type: 'detail', id });
-      } else {
-        setRoute({ type: 'list' });
-      }
-    };
-
-    handleHashChange();
+    const handleHashChange = () => setRoute(parseRoute(window.location.hash));
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   return (
-    <div className="app">
-      {route.type === 'list' && <DocumentsPage />}
-      {route.type === 'detail' && <DocumentDetailPage documentId={route.id} />}
+    <div className="app-shell">
+      <div className="app-shell__glow app-shell__glow--left" />
+      <div className="app-shell__glow app-shell__glow--right" />
+      <main className="app-main">
+        {route.type === 'list' && <DocumentsPage />}
+        {route.type === 'detail' && <DocumentDetailPage documentId={route.id} />}
+      </main>
     </div>
   );
 }
