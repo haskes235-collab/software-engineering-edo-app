@@ -1,27 +1,15 @@
-import { useState } from 'react';
-import { CreateDocumentDto } from '@shared/types';
-import { DocumentEditor } from '../components/DocumentEditor/DocumentEditor';
-import { DocumentList } from '../components/DocumentList/DocumentList';
-import { useDocuments } from '../hooks/useDocuments';
+import { observer } from 'mobx-react-lite';
+import { DocumentsPageController } from './DocumentsPage.controller';
+import { DocumentList } from '../../components/DocumentList';
+import { DocumentEditor } from '../../components/DocumentEditor';
 
-function countDrafts(total: ReturnType<typeof useDocuments>['documents']) {
-  return total.filter((document) => document.status === 'DRAFT').length;
+interface DocumentsPageViewProps {
+  controller: DocumentsPageController;
 }
 
-export function DocumentsPage() {
-  const { documents, loading, error, reload } = useDocuments();
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-
-  const handleDocumentClick = (id: string) => {
-    window.location.hash = `/document/${id}`;
-  };
-
-  const handleCreateDocument = async (dto: CreateDocumentDto) => {
-    await window.electronAPI.documents.create(dto);
-    await reload();
-    setIsCreateDialogOpen(false);
-  };
-
+export const DocumentsPageView = observer(function DocumentsPageView({
+  controller,
+}: DocumentsPageViewProps) {
   return (
     <div className="page-shell">
       <section className="page-hero">
@@ -37,15 +25,15 @@ export function DocumentsPage() {
         <div className="hero-metrics">
           <div className="hero-metric">
             <div className="hero-metric__label">Всего</div>
-            <div className="hero-metric__value">{documents.length}</div>
+            <div className="hero-metric__value">{controller.documents.length}</div>
           </div>
           <div className="hero-metric">
             <div className="hero-metric__label">Черновики</div>
-            <div className="hero-metric__value">{countDrafts(documents)}</div>
+            <div className="hero-metric__value">{controller.draftCount}</div>
           </div>
           <div className="hero-metric">
             <div className="hero-metric__label">Состояние</div>
-            <div className="hero-metric__value">{loading ? '...' : 'Актуально'}</div>
+            <div className="hero-metric__value">{controller.loading ? '...' : 'Актуально'}</div>
           </div>
         </div>
       </section>
@@ -58,18 +46,18 @@ export function DocumentsPage() {
         </div>
 
         <DocumentList
-          documents={documents}
-          loading={loading}
-          error={error}
-          onDocumentClick={handleDocumentClick}
+          documents={controller.documents}
+          loading={controller.loading}
+          error={controller.error}
+          onDocumentClick={(id) => controller.navigateToDetail(id)}
         />
       </section>
 
-      {isCreateDialogOpen && (
+      {controller.isCreateDialogOpen && (
         <div
           className="modal-backdrop"
           role="presentation"
-          onClick={() => setIsCreateDialogOpen(false)}
+          onClick={() => controller.closeCreateDialog()}
         >
           <div
             className="modal-panel"
@@ -79,12 +67,12 @@ export function DocumentsPage() {
             onClick={(event) => event.stopPropagation()}
           >
             <DocumentEditor
-              onSave={handleCreateDocument}
-              onCancel={() => setIsCreateDialogOpen(false)}
+              onSave={(dto) => controller.createDocument(dto)}
+              onCancel={() => controller.closeCreateDialog()}
             />
           </div>
         </div>
       )}
     </div>
   );
-}
+});

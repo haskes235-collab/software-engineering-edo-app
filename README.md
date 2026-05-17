@@ -5,7 +5,7 @@ A desktop application for managing documents in an Electronic Document Managemen
 ## Stack
 
 - Electron 30 + React 18 + TypeScript
-- SQLite via sql.js (WASM)
+- SQLite via better-sqlite3
 - Vite / electron-vite
 
 ## Features
@@ -27,13 +27,13 @@ Design pattern: **Repository** — data access logic is hidden behind an interfa
 ### Install dependencies
 
 ```bash
-npm install
+yarn install
 ```
 
 ### Development mode
 
 ```bash
-npm run dev
+yarn dev
 ```
 
 ### Production build
@@ -55,7 +55,7 @@ npm run build
 │   │   └── utils.ts      # UUID and date formatting helpers
 │   ├── main/             # Main process logic
 │   │   ├── db/
-│   │   │   ├── database.ts   # SQLite singleton (sql.js)
+│   │   │   ├── database.ts   # SQLite connection singleton
 │   │   │   └── migrations.ts # Schema and seed data
 │   │   ├── repositories/
 │   │   │   ├── IDocumentRepository.ts # Repository interface
@@ -87,12 +87,12 @@ All data access is encapsulated behind `IDocumentRepository` interface. This all
 - Easy unit testing via mock implementations
 - Clear boundary between data and service layers
 
-### sql.js (WASM SQLite)
+### better-sqlite3
 
-Using sql.js instead of better-sqlite3 to avoid native compilation requirements. This provides:
-- Pure JavaScript/WASM implementation
-- No Visual Studio C++ build tools required
-- Same synchronous API pattern as better-sqlite3
+Using better-sqlite3 in the Electron main process provides:
+- Native SQLite driver without a separate WASM asset
+- Simple synchronous API that fits Electron desktop apps well
+- Direct file persistence without manual export/save steps
 
 ### Atomic versioning
 

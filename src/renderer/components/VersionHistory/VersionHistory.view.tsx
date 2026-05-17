@@ -1,23 +1,19 @@
-import { useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import { DocumentVersion } from '@shared/types';
 import { formatDateTime } from '@shared/utils';
+import { VersionHistoryController } from './VersionHistory.controller';
 import './VersionHistory.css';
 
-interface VersionHistoryProps {
-  versions: DocumentVersion[];
+interface VersionHistoryViewProps {
+  controller: VersionHistoryController;
   onVersionClick: (version: DocumentVersion) => void;
 }
 
-export function VersionHistory({ versions, onVersionClick }: VersionHistoryProps) {
-  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
-
-  const sortedVersions = [...versions].sort((a, b) => {
-    return sortOrder === 'desc'
-      ? b.versionNumber - a.versionNumber
-      : a.versionNumber - b.versionNumber;
-  });
-
-  if (versions.length === 0) {
+export const VersionHistoryView = observer(function VersionHistoryView({
+  controller,
+  onVersionClick,
+}: VersionHistoryViewProps) {
+  if (controller.sortedVersions.length === 0) {
     return <div className="version-history-empty">Версий пока нет</div>;
   }
 
@@ -27,9 +23,9 @@ export function VersionHistory({ versions, onVersionClick }: VersionHistoryProps
         <h3>История версий</h3>
         <button
           className="sort-btn"
-          onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+          onClick={() => controller.toggleSortOrder()}
         >
-          Сортировка: {sortOrder === 'desc' ? 'Сначала новые' : 'Сначала старые'}
+          Сортировка: {controller.sortOrder === 'desc' ? 'Сначала новые' : 'Сначала старые'}
         </button>
       </div>
 
@@ -44,7 +40,7 @@ export function VersionHistory({ versions, onVersionClick }: VersionHistoryProps
             </tr>
           </thead>
           <tbody>
-            {sortedVersions.map((version) => (
+            {controller.sortedVersions.map((version) => (
               <tr
                 key={version.id}
                 className="version-row"
@@ -61,4 +57,4 @@ export function VersionHistory({ versions, onVersionClick }: VersionHistoryProps
       </div>
     </div>
   );
-}
+});

@@ -1,26 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
+import { routerController } from './renderer/controllers/RouterController';
 import { DocumentsPage } from './renderer/pages/DocumentsPage';
 import { DocumentDetailPage } from './renderer/pages/DocumentDetailPage';
 import './App.css';
 
-type Route = { type: 'list' } | { type: 'detail'; id: string };
-
-function parseRoute(hash: string): Route {
-  const normalizedHash = hash.replace(/^#/, '');
-  if (normalizedHash.startsWith('/document/')) {
-    return { type: 'detail', id: normalizedHash.replace('/document/', '') };
-  }
-  return { type: 'list' };
-}
-
 function App() {
-  const [route, setRoute] = useState<Route>(() => parseRoute(window.location.hash));
-
   useEffect(() => {
-    const handleHashChange = () => setRoute(parseRoute(window.location.hash));
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    return routerController.init();
   }, []);
+
+  const route = routerController.route;
 
   return (
     <div className="app-shell">
@@ -34,4 +24,4 @@ function App() {
   );
 }
 
-export default App;
+export default observer(App);

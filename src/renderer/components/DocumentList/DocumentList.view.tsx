@@ -1,28 +1,25 @@
-import { useState } from 'react';
-import { Document, DocStatus } from '@shared/types';
+import { observer } from 'mobx-react-lite';
+import { DocStatus } from '@shared/types';
+import { DocumentListController } from './DocumentList.controller';
 import { DocumentListItem } from './DocumentListItem';
 import './DocumentList.css';
 
-interface DocumentListProps {
-  documents: Document[];
+const ALL_STATUSES: DocStatus[] = ['DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'ARCHIVED'];
+
+interface DocumentListViewProps {
+  controller: DocumentListController;
   loading: boolean;
   error: string | null;
   onDocumentClick: (id: string) => void;
 }
 
-const ALL_STATUSES: DocStatus[] = ['DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'ARCHIVED'];
-
-export function DocumentList({
-  documents,
+export const DocumentListView = observer(function DocumentListView({
+  controller,
   loading,
   error,
   onDocumentClick,
-}: DocumentListProps) {
-  const [statusFilter, setStatusFilter] = useState<DocStatus | 'ALL'>('ALL');
-
-  const filteredDocuments = statusFilter === 'ALL'
-    ? documents
-    : documents.filter((document) => document.status === statusFilter);
+}: DocumentListViewProps) {
+  const filteredDocuments = controller.filteredDocuments;
 
   if (loading) {
     return <div className="loading">Загрузка документов...</div>;
@@ -40,8 +37,8 @@ export function DocumentList({
         </div>
         <select
           className="filter-select"
-          value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value as DocStatus | 'ALL')}
+          value={controller.statusFilter}
+          onChange={(event) => controller.setStatusFilter(event.target.value as DocStatus | 'ALL')}
         >
           <option value="ALL">Все статусы</option>
           {ALL_STATUSES.map((status) => (
@@ -79,4 +76,4 @@ export function DocumentList({
       )}
     </div>
   );
-}
+});
