@@ -349,7 +349,8 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path$1.join(__dirname$1, "preload.mjs")
+      preload: path$1.join(__dirname$1, "preload.mjs"),
+      devTools: true
     }
   });
   if (VITE_DEV_SERVER_URL) {
@@ -357,6 +358,12 @@ function createWindow() {
   } else {
     win.loadFile(path$1.join(RENDERER_DIST, "index.html"));
   }
+  win.webContents.on("before-input-event", (event, input) => {
+    if (input.type === "keyDown" && input.key === "F12") {
+      win == null ? void 0 : win.webContents.toggleDevTools();
+      event.preventDefault();
+    }
+  });
 }
 async function registerIpcHandlers() {
   const db2 = await initDatabase();

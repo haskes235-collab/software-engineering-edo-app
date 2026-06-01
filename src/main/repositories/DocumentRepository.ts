@@ -78,6 +78,9 @@ export class DocumentRepository implements IDocumentRepository {
   >;
   private readonly updateTitleStatement: Statement<[string, string, string]>;
   private readonly updateContentStatement: Statement<[string, string, string]>;
+  private readonly updateStatusStatement: Statement<
+    [Document['status'], string, string]
+  >;
   private readonly touchDocumentStatement: Statement<[string, string]>;
   private readonly deleteStatement: Statement<[string]>;
   private readonly findVersionsStatement: Statement<[string], VersionRow>;
@@ -113,6 +116,9 @@ export class DocumentRepository implements IDocumentRepository {
     this.updateContentStatement = this.db.prepare<[string, string, string]>(
       'UPDATE documents SET content = ?, updated_at = ? WHERE id = ?',
     );
+    this.updateStatusStatement = this.db.prepare<
+      [Document['status'], string, string]
+    >('UPDATE documents SET status = ?, updated_at = ? WHERE id = ?');
     this.touchDocumentStatement = this.db.prepare<[string, string]>(
       'UPDATE documents SET updated_at = ? WHERE id = ?',
     );
@@ -207,6 +213,32 @@ export class DocumentRepository implements IDocumentRepository {
     const nextVersion = this.getNextVersionNumber(id);
 
     this.performUpdate(id, existing, dto, nextVersion, now);
+
+    return this.findById(id)!;
+  }
+
+  updateStatus(
+    id: string,
+    status: Document['status'],
+    changeNote: string,
+  ): Document {
+    const existing = this.findById(id);
+    if (!existing) throw new Error(`Document not found: ${id}`);
+
+    const now = new Date().toISOString();
+    const nextVersion = this.getNextVersionNumber(id);
+
+    this.insertVersionStatement.run(
+      uuidv4(),
+      id,
+      nextVersion,
+      existing.content,
+      existing.authorId,
+      existing.authorName,
+      changeNote,
+      now,
+    );
+    this.updateStatusStatement.run(status, now, id);
 
     return this.findById(id)!;
   }
