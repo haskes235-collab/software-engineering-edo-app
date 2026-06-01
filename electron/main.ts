@@ -31,10 +31,13 @@ function createWindow(): void {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.mjs'),
     },
+    autoHideMenuBar: true,
   });
 
+  // Открыть DevTools в режиме разработки
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
+    win.webContents.openDevTools();
   } else {
     win.loadFile(path.join(RENDERER_DIST, 'index.html'));
   }

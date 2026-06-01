@@ -169,6 +169,7 @@ class DocumentRepository {
     __publicField(this, "insertVersionStatement");
     __publicField(this, "updateTitleStatement");
     __publicField(this, "updateContentStatement");
+    __publicField(this, "updateStatusStatement");
     __publicField(this, "touchDocumentStatement");
     __publicField(this, "deleteStatement");
     __publicField(this, "findVersionsStatement");
@@ -196,6 +197,7 @@ class DocumentRepository {
     this.updateContentStatement = this.db.prepare(
       "UPDATE documents SET content = ?, updated_at = ? WHERE id = ?"
     );
+    this.updateStatusStatement = this.db.prepare("UPDATE documents SET status = ?, updated_at = ? WHERE id = ?");
     this.touchDocumentStatement = this.db.prepare(
       "UPDATE documents SET updated_at = ? WHERE id = ?"
     );
@@ -275,6 +277,24 @@ class DocumentRepository {
     this.performUpdate(id, existing, dto, nextVersion, now);
     return this.findById(id);
   }
+  updateStatus(id, status, changeNote) {
+    const existing = this.findById(id);
+    if (!existing) throw new Error(`Document not found: ${id}`);
+    const now = (/* @__PURE__ */ new Date()).toISOString();
+    const nextVersion = this.getNextVersionNumber(id);
+    this.insertVersionStatement.run(
+      v4(),
+      id,
+      nextVersion,
+      existing.content,
+      existing.authorId,
+      existing.authorName,
+      changeNote,
+      now
+    );
+    this.updateStatusStatement.run(status, now, id);
+    return this.findById(id);
+  }
   delete(id) {
     this.deleteStatement.run(id);
   }
@@ -349,21 +369,16 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path$1.join(__dirname$1, "preload.mjs"),
-      devTools: true
-    }
+      preload: path$1.join(__dirname$1, "preload.mjs")
+    },
+    autoHideMenuBar: true
   });
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
+    win.webContents.openDevTools();
   } else {
     win.loadFile(path$1.join(RENDERER_DIST, "index.html"));
   }
-  win.webContents.on("before-input-event", (event, input) => {
-    if (input.type === "keyDown" && input.key === "F12") {
-      win == null ? void 0 : win.webContents.toggleDevTools();
-      event.preventDefault();
-    }
-  });
 }
 async function registerIpcHandlers() {
   const db2 = await initDatabase();

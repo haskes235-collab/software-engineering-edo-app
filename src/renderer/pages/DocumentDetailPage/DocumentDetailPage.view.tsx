@@ -64,7 +64,7 @@ export const DocumentDetailPageView = observer(function DocumentDetailPageView({
           </button>
 
           {controller.isDraft && (
-            <div className="document-actions">
+            <div className="document-actions flex gap-4">
               <button
                 className="secondary-button"
                 type="button"
