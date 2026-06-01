@@ -1,99 +1,119 @@
-# EDMS — Document Management Module
+# СЭД — модуль электронного документооборота
 
-A desktop application for managing documents in an Electronic Document Management System. Lab Assignment #3.
+Проект представляет собой настольное приложение для системы электронного документооборота. Приложение позволяет работать с документами организации, хранить историю версий и управлять жизненным циклом документа.
 
-## Stack
+## Система электронного документооборота
 
-- Electron 30 + React 18 + TypeScript
-- SQLite via better-sqlite3
-- Vite / electron-vite
+СЭД предназначена для создания, хранения, обработки, согласования и поиска документов внутри организации. В рамках учебного проекта реализованы базовые возможности:
 
-## Features
+- создание документов;
+- редактирование черновиков;
+- удаление черновиков;
+- просмотр карточки документа;
+- хранение истории версий;
+- фильтрация документов по статусу;
+- согласование документов.
 
-- Create, edit, and delete documents
-- Automatic versioning on every save — full history preserved
-- Browse version history and view content of any past version
-- Document status lifecycle: DRAFT → PENDING → APPROVED / REJECTED → ARCHIVED
-- Filter document list by status
+## Реализованный модуль согласования
 
-## Architecture
+Для лабораторной работы №3 реализован `ApprovalService`. Сервис отвечает за бизнес-логику согласования документов:
 
-Three-layer architecture: Presentation (React) → Service → Repository (SQLite).
+- отправка документа на согласование;
+- утверждение документа руководителем или администратором;
+- отклонение документа руководителем или администратором;
+- проверка роли пользователя;
+- проверка допустимости переходов между статусами;
+- запись изменения статуса в историю версий документа.
 
-Design pattern: **Repository** — data access logic is hidden behind an interface, keeping the service layer storage-agnostic.
+В модуле применен паттерн `State`: допустимые переходы между состояниями документа описаны централизованно, а сервис проверяет возможность каждого действия перед изменением статуса.
 
-## Getting started
+## Статусы документа
 
-### Install dependencies
+- `DRAFT` — черновик;
+- `PENDING` — документ отправлен на согласование;
+- `APPROVED` — документ утвержден;
+- `REJECTED` — документ отклонен;
+- `ARCHIVED` — документ помещен в архив.
+
+## Стек
+
+- Electron 30;
+- React 18;
+- TypeScript;
+- Vite;
+- MobX;
+- SQLite через `better-sqlite3`;
+- Vitest для тестирования.
+
+## Установка зависимостей
 
 ```bash
-yarn install
+npm install
 ```
 
-### Development mode
+Если в среде возникает ошибка сборки `better-sqlite3`, для запуска тестов бизнес-логики можно временно установить зависимости без postinstall-скриптов:
 
 ```bash
-yarn dev
+npm install --ignore-scripts
 ```
 
-### Production build
+## Запуск проекта
 
 ```bash
-npm run build
+npm run dev
 ```
 
-## Project structure
+## Запуск тестов
 
-```
-├── electron/              # Electron main process
-│   ├── main.ts           # Main process, IPC handlers, window creation
-│   └── preload.ts        # contextBridge API exposure
-├── src/
-│   ├── shared/           # Shared types and utilities
-│   │   ├── types.ts      # Domain types (Document, DocumentVersion, DTOs)
-│   │   ├── ipcChannels.ts # IPC channel name constants
-│   │   └── utils.ts      # UUID and date formatting helpers
-│   ├── main/             # Main process logic
-│   │   ├── db/
-│   │   │   ├── database.ts   # SQLite connection singleton
-│   │   │   └── migrations.ts # Schema and seed data
-│   │   ├── repositories/
-│   │   │   ├── IDocumentRepository.ts # Repository interface
-│   │   │   └── DocumentRepository.ts  # SQLite implementation
-│   │   └── services/
-│   │       └── DocumentService.ts     # Business logic layer
-│   └── renderer/         # React UI
-│       ├── App.tsx       # Main app with hash routing
-│       ├── electron.d.ts # Window.electronAPI type declarations
-│       ├── components/
-│       │   ├── DocumentList/     # Document list with filter
-│       │   ├── DocumentEditor/   # Create/edit form
-│       │   ├── VersionHistory/   # Version list component
-│       │   └── StatusBadge/      # Color-coded status pill
-│       ├── hooks/
-│       │   └── useDocuments.ts   # IPC data-fetching hook
-│       └── pages/
-│           ├── DocumentsPage.tsx      # Main list page
-│           └── DocumentDetailPage.tsx # Detail view with version history
-└── package.json
+```bash
+npm test
 ```
 
-## Design decisions
+Если `npm` не доступен через PATH, можно запустить Vitest через абсолютный путь к Node.js:
 
-### Repository pattern
+```powershell
+"C:\Program Files\nodejs\node.exe" ".\node_modules\vitest\vitest.mjs" run
+```
 
-All data access is encapsulated behind `IDocumentRepository` interface. This allows:
-- Swapping the storage engine without changing business logic
-- Easy unit testing via mock implementations
-- Clear boundary between data and service layers
+## Запуск покрытия
 
-### better-sqlite3
+```bash
+npm run test:coverage
+```
 
-Using better-sqlite3 in the Electron main process provides:
-- Native SQLite driver without a separate WASM asset
-- Simple synchronous API that fits Electron desktop apps well
-- Direct file persistence without manual export/save steps
+Альтернативный запуск через абсолютный путь:
 
-### Atomic versioning
+```powershell
+"C:\Program Files\nodejs\node.exe" ".\node_modules\vitest\vitest.mjs" run --coverage
+```
 
-Every document update is atomic — the previous content is saved as a new version row and the document update happen in a single transaction. If either fails, both are rolled back.
+## CI/CD
+
+Для автоматического запуска тестов создан workflow GitHub Actions:
+
+```text
+.github/workflows/tests.yml
+```
+
+Pipeline запускается при `push` и `pull_request`, устанавливает зависимости, выполняет тесты и строит отчет покрытия.
+
+## Отчеты по лабораторным работам
+
+Отчеты по лабораторным работам №3 и №4 находятся в папке `reports`.
+
+## Структура проекта
+
+```text
+electron/                         # Electron main process and preload
+src/shared/                       # Общие типы и IPC-каналы
+src/main/db/                      # SQLite подключение и миграции
+src/main/repositories/            # Репозитории данных
+src/main/services/                # Бизнес-логика
+src/main/services/ApprovalService.ts
+src/main/services/__tests__/      # Тесты бизнес-логики
+src/renderer/                     # React-интерфейс
+```
+
+## Ссылка на GitHub
+
+https://github.com/haskes235-collab/software-engineering-edo-app
