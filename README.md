@@ -116,4 +116,4 @@ src/renderer/                     # React-интерфейс
 
 ## Ссылка на GitHub
 
-`[Ссылка на репозиторий GitHub]`
+https://github.com/haskes235-collab/software-engineering-edo-app
