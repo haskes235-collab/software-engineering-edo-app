@@ -1,0 +1,110 @@
+.document-list {
+  padding: 0 28px 28px;
+}
+
+.document-list-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.document-list-summary {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.filter-select {
+  min-width: 180px;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  background: #fff;
+  color: #0f172a;
+}
+
+.list-table-shell {
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.document-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.document-table thead {
+  background: #f8fafc;
+}
+
+.document-table th {
+  padding: 16px 18px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.document-list-item {
+  cursor: pointer;
+  transition:
+    background-color 0.14s ease,
+    transform 0.14s ease;
+}
+
+.document-list-item:hover {
+  background: rgba(14, 116, 144, 0.05);
+}
+
+.document-list-item td {
+  padding: 18px;
+  border-top: 1px solid rgba(226, 232, 240, 0.85);
+  color: #1e293b;
+}
+
+.document-list-item td:first-child {
+  font-weight: 700;
+}
+
+.document-list-item__meta {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+
+.loading,
+.error,
+.empty {
+  padding: 36px 18px;
+  text-align: center;
+}
+
+.error {
+  color: #b91c1c;
+}
+
+@media (max-width: 768px) {
+  .document-list {
+    padding: 0 20px 20px;
+  }
+
+  .document-list-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .list-table-shell {
+    overflow-x: auto;
+  }
+
+  .document-table {
+    min-width: 720px;
+  }
+}
