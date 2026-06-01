@@ -1,0 +1,12 @@
+13:53:01 [vite] warning: `esbuild` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `oxc` instead.
+13:53:01 [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+Both esbuild and oxc options were set. oxc options will be used and esbuild options will be ignored. The following esbuild options were set: `{ jsx: 'automatic', jsxImportSource: undefined }`
+
+ RUN  v4.1.8 C:/Users/Батраз/Desktop/Учеба/Програмная инженерия 2 семестр/software-engineering-edo-app-master
+
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  13:53:01
+   Duration  345ms (transform 60ms, setup 0ms, import 86ms, tests 10ms, environment 0ms)
+
