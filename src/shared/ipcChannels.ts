@@ -8,3 +8,10 @@ export const IPC = {
     GET_VERSIONS: 'documents:getVersions',
   },
 } as const;
+
+export const AUTH_CHANNELS = {
+  LOGIN: 'auth:login',
+  REGISTER: 'auth:register',
+  LOGOUT: 'auth:logout',
+  GET_CURRENT_USER: 'auth:get-current-user',
+} as const;

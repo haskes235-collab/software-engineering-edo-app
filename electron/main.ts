@@ -3,9 +3,10 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { IPC } from '../src/shared/ipcChannels';
 import { initDatabase, closeDatabase } from '../src/main/db/database';
-import { DocumentRepository } from '../src/main/repositories/DocumentRepository';
+import { DocumentRepository } from '../src/main/repositories/documentRepository/DocumentRepository';
 import { DocumentService } from '../src/main/services/DocumentService';
 import { CreateDocumentDto, UpdateDocumentDto } from '../src/shared/types';
+import { registerAuthHandlers } from '../src/main/ipc/handlers/authHandlers';
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -65,6 +66,8 @@ async function registerIpcHandlers(): Promise<void> {
   ipcMain.handle(IPC.DOCUMENTS.GET_VERSIONS, (_, id: string) =>
     service.getDocumentVersions(id),
   );
+
+  registerAuthHandlers(db);
 }
 
 app.on('window-all-closed', () => {

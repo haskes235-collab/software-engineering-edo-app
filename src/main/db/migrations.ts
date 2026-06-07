@@ -88,3 +88,15 @@ export function runMigrations(db: SqliteDatabase): void {
     }
   }
 }
+
+export const up = (db: any) => {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      password TEXT NOT NULL,
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    `);
+};
