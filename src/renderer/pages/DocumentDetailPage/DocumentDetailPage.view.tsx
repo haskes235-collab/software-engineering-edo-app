@@ -4,6 +4,7 @@ import { DocumentDetailPageController } from './DocumentDetailPage.controller';
 import { StatusBadge } from '../../components/StatusBadge/StatusBadge';
 import { VersionHistory } from '../../components/VersionHistory';
 import { DocumentEditor } from '../../components/DocumentEditor';
+import { DocumentVersionComparison } from '../../components/DocumentVersionComparison';
 
 interface DocumentDetailPageViewProps {
   controller: DocumentDetailPageController;
@@ -33,7 +34,8 @@ export const DocumentDetailPageView = observer(function DocumentDetailPageView({
           <p className="page-hero__eyebrow">Карточка документа</p>
           <h1>{document.title}</h1>
           <p className="page-hero__subtitle">
-            Полный просмотр документа с метаданными, историей версий и действиями для черновика.
+            Полный просмотр документа с метаданными, историей версий, действиями для черновика и
+            сравнением выбранной версии с текущим содержимым.
           </p>
         </div>
 
@@ -128,33 +130,10 @@ export const DocumentDetailPageView = observer(function DocumentDetailPageView({
           </section>
         </div>
 
-        <aside className="surface-panel detail-card version-preview">
-          <div className="detail-card__header">
-            <div className="detail-card__title">
-              <h2>Просмотр версии</h2>
-            </div>
-          </div>
-
-          <div className="detail-card__body">
-            {controller.selectedVersion ? (
-              <>
-                <div className="version-preview__meta">
-                  <strong>v{controller.selectedVersion.versionNumber}</strong>
-                  <span>{controller.selectedVersion.authorName}</span>
-                  <span>{formatDateTime(controller.selectedVersion.createdAt)}</span>
-                </div>
-                <div className="version-preview__note">
-                  {controller.selectedVersion.changeNote || 'Комментарий к изменениям отсутствует.'}
-                </div>
-                <div className="document-content-block">
-                  <pre>{controller.selectedVersion.content}</pre>
-                </div>
-              </>
-            ) : (
-              <div className="page-state">Выберите строку версии, чтобы посмотреть её содержимое.</div>
-            )}
-          </div>
-        </aside>
+        <DocumentVersionComparison
+          currentDocument={controller.document}
+          selectedVersion={controller.selectedVersion}
+        />
       </div>
 
       {controller.isEditDialogOpen && (
