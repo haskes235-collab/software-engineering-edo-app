@@ -22,11 +22,19 @@ export default defineConfig({
       preload: {
         input: path.join(__dirname, 'electron/preload.ts'),
       },
-      renderer: process.env.NODE_ENV === 'test'
-        ? undefined
-        : {},
+      renderer: process.env.NODE_ENV === 'test' ? undefined : {},
     }),
   ],
+
+  server: {
+    host: '127.0.0.1',     // ← обязательно
+    port: 5173,
+    strictPort: true,
+    hmr: {
+      host: '127.0.0.1',
+    }
+  },
+
   resolve: {
     alias: {
       '@shared': path.resolve(__dirname, 'src/shared'),

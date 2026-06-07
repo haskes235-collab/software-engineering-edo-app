@@ -57,3 +57,33 @@ export interface ApprovalResult {
   nextStatus: DocStatus;
   comment?: ApprovalComment;
 }
+
+export interface User {
+  id: number;
+  email: string,
+  name: string,
+  password: string // hashed
+  createdAt: string;
+}
+
+export interface LoginDTO {
+  email: string,
+  password: string;
+}
+
+export interface RegisterDTO {
+  email: string,
+  password: string,
+  name: string;
+}
+
+export interface AuthResponse {
+  user: Omit<User, 'password'>;
+  token: string;
+}
+
+export interface CurrentUser {
+  id: number;
+  email: string;
+  name: string;
+}

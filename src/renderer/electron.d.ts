@@ -11,6 +11,12 @@ declare global {
         delete(id: string): Promise<void>;
         getVersions(id: string): Promise<DocumentVersion[]>;
       };
+      auth: {
+        login: (dto: { email: string; password: string }) => Promise<any>;
+        register: (dto: { name: string; email: string; password: string }) => Promise<any>;
+        logout: () => Promise<void>;
+        getCurrentUser: () => Promise<CurrentUser | null | { error: any }>;
+      };
     };
   }
 }
