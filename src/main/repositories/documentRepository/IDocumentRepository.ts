@@ -3,7 +3,7 @@ import {
   DocumentVersion,
   CreateDocumentDto,
   UpdateDocumentDto,
-} from '../../shared/types';
+} from '../../../shared/types';
 
 export interface IDocumentRepository {
   findAll(): Document[];
