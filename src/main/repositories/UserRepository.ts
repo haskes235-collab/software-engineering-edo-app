@@ -1,30 +1,41 @@
-import Database from "better-sqlite3";
-import { User } from '../../shared/types';
+import { eq } from 'drizzle-orm';
+import { users, DbUser } from '../db/schema';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import * as schema from '../db/schema';
 
 export class UserRepository {
-    constructor(private db: Database.Database) {}
+    constructor(private readonly db: BetterSQLite3Database<typeof schema>) {}
 
-    create(user: Omit<User, 'id' | 'createdAt'>): User {
-        const stmt = this.db.prepare(`
-            INSERT INTO users (email, name, password)
-            VALUES (@email, @name, @password)
-        `);
-        const result = stmt.run(user);
-        return this.findById(result.lastInsertRowid as number)!;
+    create(user: Omit<DbUser, 'id' | 'createdAt'>): DbUser {
+        this.db.insert(users).values(user).run();
+
+        return this.findByEmail(user.email)!;
     }
 
-    findByEmail(email: string): User | null {
-        const stmt = this.db.prepare('SELECT * FROM users WHERE email = ?');
-        return stmt.get(email) as User | null;
+    findByEmail(email: string): DbUser | null {
+        return (
+            this.db
+                .select()
+                .from(users)
+                .where(eq(users.email, email))
+                .get() ?? null
+        );
     }
 
-    findById(id: number):User | null{
-        const stmt = this.db.prepare('SELECT * FROM users WHERE id = ?');
-        return stmt.get(id) as User | null;
+    findById(id: number): DbUser | null {
+        return (
+            this.db
+                .select()
+                .from(users)
+                .where(eq(users.id, id))
+                .get() ?? null
+        );
     }
 
-    getAll(): User[] {
-        const stmt = this.db.prepare('SELECT * FROM users');
-        return stmt.all() as User[];
+    getAll(): DbUser[] {
+        return this.db
+            .select()
+            .from(users)
+            .all();
     }
 }

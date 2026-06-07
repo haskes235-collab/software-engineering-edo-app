@@ -6,11 +6,11 @@ import {
   DocumentVersion,
   CreateDocumentDto,
   UpdateDocumentDto,
-} from '../../shared/types';
-import { documents, documentVersions } from '../db/schema';
-import type { DbDocument, DbDocumentVersion } from '../db/schema';
+} from '../../../shared/types';
+import { documents, documentVersions } from '../../db/schema';
+import type { DbDocument, DbDocumentVersion } from '../../db/schema';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import * as schema from '../db/schema';
+import * as schema from '../../db/schema';
 
 function toDocument(dbDoc: DbDocument): Document {
   return {

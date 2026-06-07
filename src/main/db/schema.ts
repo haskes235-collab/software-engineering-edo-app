@@ -3,6 +3,7 @@ import { InferSelectModel, relations, sql } from 'drizzle-orm'
 
 export type DbDocument = InferSelectModel<typeof documents>;
 export type DbDocumentVersion = InferSelectModel<typeof documentVersions>;
+export type DbUser = InferSelectModel<typeof users>;
 
 export const documents = sqliteTable('documents', {
   id: text('id').primaryKey(),
@@ -50,3 +51,13 @@ export const documentVersionsRelations = relations(documentVersions, ({ one }) =
     references: [documents.id],
   }),
 }))
+
+export const users = sqliteTable('users', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  email: text('email').notNull().unique(),
+  name: text('name').notNull(),
+  password: text('password').notNull(),
+  createdAt: text('created_at')
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});

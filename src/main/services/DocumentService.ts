@@ -1,4 +1,4 @@
-import { IDocumentRepository } from '../repositories/IDocumentRepository';
+import { IDocumentRepository } from '@main/repositories/documentRepository/IDocumentRepository';
 import {
   Document,
   DocumentVersion,
