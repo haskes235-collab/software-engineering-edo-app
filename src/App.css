@@ -272,21 +272,6 @@
   align-self: start;
 }
 
-.version-preview__meta {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  color: #475569;
-}
-
-.version-preview__note {
-  padding: 14px 16px;
-  border-radius: 16px;
-  color: #7c2d12;
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
-}
-
 .page-state {
   padding: 48px 24px;
   border-radius: 24px;

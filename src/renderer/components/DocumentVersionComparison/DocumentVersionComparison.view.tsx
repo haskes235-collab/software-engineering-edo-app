@@ -5,6 +5,7 @@ import './DocumentVersionComparison.css';
 
 interface DocumentVersionComparisonViewProps {
   controller: DocumentVersionComparisonController;
+  onRestoreVersion: (versionNumber: number) => Promise<void> | void;
 }
 
 function renderLineText(text: string): string {
@@ -54,6 +55,7 @@ function renderPane(
 export const DocumentVersionComparisonView = observer(
   function DocumentVersionComparisonView({
     controller,
+    onRestoreVersion,
   }: DocumentVersionComparisonViewProps) {
     if (!controller.currentDocument || !controller.selectedVersion) {
       return (
@@ -63,7 +65,8 @@ export const DocumentVersionComparisonView = observer(
       );
     }
 
-    const { selectedVersion, rows, summary, hasDifferences } = controller;
+    const { currentDocument, selectedVersion, rows, summary, hasDifferences } = controller;
+    const canRestore = currentDocument.status === 'DRAFT';
 
     return (
       <>
@@ -128,18 +131,35 @@ export const DocumentVersionComparisonView = observer(
                     </p>
                   </div>
 
-                  <button
-                    type="button"
-                    className="ghost-button version-comparison__close-button"
-                    onClick={() => controller.closeDetails()}
-                  >
-                    Закрыть
-                  </button>
+                  <div className="version-comparison__dialog-actions">
+                    {canRestore && (
+                      <button
+                        type="button"
+                        className="primary-button"
+                        onClick={() => void onRestoreVersion(selectedVersion.versionNumber)}
+                      >
+                        Восстановить версию
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="ghost-button version-comparison__close-button"
+                      onClick={() => controller.closeDetails()}
+                    >
+                      Закрыть
+                    </button>
+                  </div>
                 </div>
 
                 <div className="version-comparison__note">
                   {selectedVersion.changeNote || 'Комментарий к изменениям отсутствует.'}
                 </div>
+
+                {!canRestore && (
+                  <div className="version-comparison__notice">
+                    Восстановление доступно только для черновика.
+                  </div>
+                )}
 
                 <div className="version-comparison__split">
                   {renderPane('Выбранная версия', 'left', rows)}

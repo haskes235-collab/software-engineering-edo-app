@@ -59,6 +59,9 @@ async function registerIpcHandlers(): Promise<void> {
     IPC.DOCUMENTS.UPDATE,
     (_, id: string, dto: UpdateDocumentDto) => service.updateDocument(id, dto),
   );
+  ipcMain.handle(IPC.DOCUMENTS.RESTORE_VERSION, (_, id: string, versionNumber: number) =>
+    service.restoreDocumentVersion(id, versionNumber),
+  );
   ipcMain.handle(IPC.DOCUMENTS.DELETE, (_, id: string) =>
     service.deleteDocument(id),
   );

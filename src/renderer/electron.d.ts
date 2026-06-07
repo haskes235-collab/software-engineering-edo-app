@@ -8,6 +8,7 @@ declare global {
         getById(id: string): Promise<Document | undefined>;
         create(dto: CreateDocumentDto): Promise<Document>;
         update(id: string, dto: UpdateDocumentDto): Promise<Document>;
+        restoreVersion(id: string, versionNumber: number): Promise<Document>;
         delete(id: string): Promise<void>;
         getVersions(id: string): Promise<DocumentVersion[]>;
       };

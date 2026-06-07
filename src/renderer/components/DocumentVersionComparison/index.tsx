@@ -6,14 +6,21 @@ import { DocumentVersionComparisonView } from './DocumentVersionComparison.view'
 interface DocumentVersionComparisonProps {
   currentDocument: Document | null;
   selectedVersion: DocumentVersion | null;
+  onRestoreVersion: (versionNumber: number) => Promise<void> | void;
 }
 
 export function DocumentVersionComparison({
   currentDocument,
   selectedVersion,
+  onRestoreVersion,
 }: DocumentVersionComparisonProps) {
   const controller = useLocalObservable(() => new DocumentVersionComparisonController());
   controller.setContext(currentDocument, selectedVersion);
 
-  return <DocumentVersionComparisonView controller={controller} />;
+  return (
+    <DocumentVersionComparisonView
+      controller={controller}
+      onRestoreVersion={onRestoreVersion}
+    />
+  );
 }

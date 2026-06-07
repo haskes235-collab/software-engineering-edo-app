@@ -1,8 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { AUTH_CHANNELS, IPC } from '../src/shared/ipcChannels';
 import { CreateDocumentDto, UpdateDocumentDto } from '../src/shared/types';
-import { register } from 'node:module';
-import { getCurrentIsoDate } from '@shared/utils';
 
 contextBridge.exposeInMainWorld('electronAPI', {
   documents: {
@@ -12,6 +10,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke(IPC.DOCUMENTS.CREATE, dto),
     update: (id: string, dto: UpdateDocumentDto) =>
       ipcRenderer.invoke(IPC.DOCUMENTS.UPDATE, id, dto),
+    restoreVersion: (id: string, versionNumber: number) =>
+      ipcRenderer.invoke(IPC.DOCUMENTS.RESTORE_VERSION, id, versionNumber),
     delete: (id: string) => ipcRenderer.invoke(IPC.DOCUMENTS.DELETE, id),
     getVersions: (id: string) =>
       ipcRenderer.invoke(IPC.DOCUMENTS.GET_VERSIONS, id),

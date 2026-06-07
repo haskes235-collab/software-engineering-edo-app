@@ -133,6 +133,7 @@ export const DocumentDetailPageView = observer(function DocumentDetailPageView({
         <DocumentVersionComparison
           currentDocument={controller.document}
           selectedVersion={controller.selectedVersion}
+          onRestoreVersion={(versionNumber) => void controller.restoreDocumentVersion(versionNumber)}
         />
       </div>
 

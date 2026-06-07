@@ -122,6 +122,13 @@
   flex-shrink: 0;
 }
 
+.version-comparison__dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .version-comparison__dialog-body {
   overflow: hidden;
 }
@@ -212,6 +219,10 @@
   .version-comparison__dialog-header {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .version-comparison__dialog-actions {
+    justify-content: flex-start;
   }
 
   .version-comparison__split {
