@@ -2,10 +2,10 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { IPC } from '../src/shared/ipcChannels';
-import { initDatabase, closeDatabase } from '../src/main/db/database';
 import { DocumentRepository } from '../src/main/repositories/DocumentRepository';
 import { DocumentService } from '../src/main/services/DocumentService';
 import { CreateDocumentDto, UpdateDocumentDto } from '../src/shared/types';
+import { initDatabase, closeDatabase } from '../src/main/db';
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -31,10 +31,12 @@ function createWindow(): void {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.mjs'),
     },
+    autoHideMenuBar: true,
   });
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
+    win.webContents.openDevTools();
   } else {
     win.loadFile(path.join(RENDERER_DIST, 'index.html'));
   }
@@ -78,8 +80,12 @@ app.on('activate', () => {
 });
 
 app.whenReady().then(async () => {
-  await registerIpcHandlers();
-  createWindow();
+    try {
+        await registerIpcHandlers();
+        createWindow();
+    } catch (e) {
+        console.error(e);
+    }
 });
 
 app.on('will-quit', () => closeDatabase());
