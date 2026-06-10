@@ -39,6 +39,7 @@ export default defineConfig({
     alias: {
       '@shared': path.resolve(__dirname, 'src/shared'),
       '@renderer': path.resolve(__dirname, 'src/renderer'),
+      '@main': path.resolve(__dirname, 'src/main'),
     },
   },
   optimizeDeps: {
