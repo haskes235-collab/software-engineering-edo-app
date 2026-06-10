@@ -68,6 +68,20 @@ export class DocumentDetailPageController {
     await this.loadDocumentData();
   }
 
+  async restoreDocumentVersion(versionNumber: number): Promise<void> {
+    if (!this.document) return;
+    if (!window.confirm(`Восстановить версию v${versionNumber} для документа "${this.document.title}"?`)) {
+      return;
+    }
+
+    try {
+      await documentRepository.restoreVersion(this.documentId, versionNumber);
+      await this.loadDocumentData();
+    } catch (err) {
+      this.setError(this.extractErrorMessage(err));
+    }
+  }
+
   openEditDialog(): void {
     this.isEditDialogOpen = true;
   }

@@ -4,6 +4,7 @@ export const IPC = {
     GET_BY_ID: 'documents:getById',
     CREATE: 'documents:create',
     UPDATE: 'documents:update',
+    RESTORE_VERSION: 'documents:restoreVersion',
     DELETE: 'documents:delete',
     GET_VERSIONS: 'documents:getVersions',
   },

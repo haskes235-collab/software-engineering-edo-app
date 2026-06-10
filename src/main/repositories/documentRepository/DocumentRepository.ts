@@ -150,6 +150,44 @@ export class DocumentRepository implements IDocumentRepository {
     return this.findById(id)!;
   }
 
+  restoreVersion(id: string, versionNumber: number, changeNote: string): Document {
+    const existing = this.findById(id);
+    if (!existing) throw new Error(`Document not found: ${id}`);
+
+    const version = this.getVersionByNumber(id, versionNumber);
+    if (!version) {
+      throw new Error(`Version not found: ${versionNumber} for document ${id}`);
+    }
+
+    const now = new Date().toISOString();
+    const nextVersion = this.getNextVersionNumber(id);
+
+    this.db.transaction((tx) => {
+      const versionId = uuidv4();
+      tx.insert(documentVersions).values({
+        id: versionId,
+        documentId: id,
+        versionNumber: nextVersion,
+        content: existing.content,
+        authorId: existing.authorId,
+        authorName: existing.authorName,
+        changeNote,
+        createdAt: now,
+      }).run();
+
+      tx.update(documents)
+        .set({
+          content: version.content,
+          updatedAt: now,
+          currentVersionId: versionId,
+        })
+        .where(eq(documents.id, id))
+        .run();
+    });
+
+    return this.findById(id)!;
+  }
+
   delete(id: string): void {
     const now = new Date().toISOString();
     this.db

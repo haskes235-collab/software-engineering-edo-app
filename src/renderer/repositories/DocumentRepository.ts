@@ -18,6 +18,10 @@ export class DocumentRepository extends BaseRepository<Document> {
     return window.electronAPI.documents.update(id, dto);
   }
 
+  async restoreVersion(id: string, versionNumber: number): Promise<Document> {
+    return window.electronAPI.documents.restoreVersion(id, versionNumber);
+  }
+
   async delete(id: string): Promise<void> {
     return window.electronAPI.documents.delete(id);
   }
