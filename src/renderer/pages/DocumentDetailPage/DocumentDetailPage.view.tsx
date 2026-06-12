@@ -127,7 +127,7 @@ export const DocumentDetailPageView = observer(function DocumentDetailPageView({
                     <button
                       className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-600 to-orange-700 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-950/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
                       type="button"
-                      disabled={controller.approvalInProgress}
+                      disabled={controller.approvalInProgress || !controller.isPending}
                       onClick={() => void controller.rejectDocument()}
                     >
                       Отклонить
@@ -161,6 +161,39 @@ export const DocumentDetailPageView = observer(function DocumentDetailPageView({
         {controller.approvalError && (
           <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
             {controller.approvalError}
+          </div>
+        )}
+
+        {controller.isRejectDialogOpen && (
+          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
+            <label className="flex flex-col gap-2 text-sm font-medium text-amber-950">
+              Причина отклонения
+              <textarea
+                className="min-h-24 rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm font-normal text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+                value={controller.rejectComment}
+                onChange={(event) => controller.setRejectComment(event.target.value)}
+                disabled={controller.approvalInProgress}
+                placeholder="Комментарий можно оставить пустым"
+              />
+            </label>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <button
+                className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                type="button"
+                disabled={controller.approvalInProgress}
+                onClick={() => controller.cancelRejectDocument()}
+              >
+                Отмена
+              </button>
+              <button
+                className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-600 to-orange-700 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-orange-950/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                type="button"
+                disabled={controller.approvalInProgress}
+                onClick={() => void controller.confirmRejectDocument()}
+              >
+                Подтвердить отклонение
+              </button>
+            </div>
           </div>
         )}
       </section>

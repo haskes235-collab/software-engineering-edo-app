@@ -25,6 +25,8 @@ export class DocumentDetailPageController {
   approvalRole: UserRole = 'MANAGER';
   approvalInProgress = false;
   approvalError: string | null = null;
+  isRejectDialogOpen = false;
+  rejectComment = '';
 
   private documentId: string;
 
@@ -168,15 +170,23 @@ export class DocumentDetailPageController {
     );
   }
 
-  async rejectDocument(): Promise<void> {
-    const comment = window.prompt('Укажите причину отклонения документа', '');
-    if (comment === null) return;
+  rejectDocument(): void {
+    if (!this.isPending) {
+      this.setApprovalError('Отклонение доступно только для документа на согласовании.');
+      return;
+    }
 
+    this.setApprovalError(null);
+    this.rejectComment = '';
+    this.isRejectDialogOpen = true;
+  }
+
+  async confirmRejectDocument(): Promise<void> {
     await this.runApprovalAction(() =>
       documentRepository.rejectDocument(
         this.documentId,
         this.buildApprovalActor(),
-        comment,
+        this.rejectComment.trim() || undefined,
       ),
     );
   }
@@ -184,6 +194,15 @@ export class DocumentDetailPageController {
   setApprovalRole(role: UserRole): void {
     this.approvalRole = role;
     this.setApprovalError(null);
+  }
+
+  setRejectComment(comment: string): void {
+    this.rejectComment = comment;
+  }
+
+  cancelRejectDocument(): void {
+    this.isRejectDialogOpen = false;
+    this.rejectComment = '';
   }
 
   openEditDialog(): void {
@@ -234,6 +253,7 @@ export class DocumentDetailPageController {
 
     try {
       await action();
+      this.cancelRejectDocument();
       await this.loadDocumentData();
     } catch (err) {
       this.setApprovalError(this.extractErrorMessage(err));
