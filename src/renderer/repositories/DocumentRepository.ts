@@ -1,5 +1,15 @@
 import { BaseRepository } from '../bases/BaseRepository';
-import { Document, DocumentVersion, CreateDocumentDto, UpdateDocumentDto } from '@shared/types';
+import {
+  AddDocumentAttachmentDto,
+  ApprovalActor,
+  ApprovalResult,
+  Document,
+  DocumentAttachment,
+  DocumentAttachmentFile,
+  DocumentVersion,
+  CreateDocumentDto,
+  UpdateDocumentDto,
+} from '@shared/types';
 
 export class DocumentRepository extends BaseRepository<Document> {
   async getAll(): Promise<readonly Document[]> {
@@ -18,12 +28,62 @@ export class DocumentRepository extends BaseRepository<Document> {
     return window.electronAPI.documents.update(id, dto);
   }
 
+  async restoreVersion(id: string, versionNumber: number): Promise<Document> {
+    return window.electronAPI.documents.restoreVersion(id, versionNumber);
+  }
+
   async delete(id: string): Promise<void> {
     return window.electronAPI.documents.delete(id);
   }
 
   async getVersions(documentId: string): Promise<readonly DocumentVersion[]> {
     return window.electronAPI.documents.getVersions(documentId);
+  }
+
+  async getAttachments(documentId: string): Promise<readonly DocumentAttachment[]> {
+    return window.electronAPI.documents.getAttachments(documentId);
+  }
+
+  async addAttachment(
+    documentId: string,
+    dto: AddDocumentAttachmentDto,
+  ): Promise<DocumentAttachment> {
+    return window.electronAPI.documents.addAttachment(documentId, dto);
+  }
+
+  async getAttachmentFile(
+    documentId: string,
+    attachmentId: string,
+  ): Promise<DocumentAttachmentFile> {
+    return window.electronAPI.documents.getAttachmentFile(documentId, attachmentId);
+  }
+
+  async deleteAttachment(documentId: string, attachmentId: string): Promise<void> {
+    return window.electronAPI.documents.deleteAttachment(documentId, attachmentId);
+  }
+
+  async submitForApproval(
+    documentId: string,
+    actor: ApprovalActor,
+    comment?: string,
+  ): Promise<ApprovalResult> {
+    return window.electronAPI.approval.submit(documentId, actor, comment);
+  }
+
+  async approveDocument(
+    documentId: string,
+    actor: ApprovalActor,
+    comment?: string,
+  ): Promise<ApprovalResult> {
+    return window.electronAPI.approval.approve(documentId, actor, comment);
+  }
+
+  async rejectDocument(
+    documentId: string,
+    actor: ApprovalActor,
+    comment?: string,
+  ): Promise<ApprovalResult> {
+    return window.electronAPI.approval.reject(documentId, actor, comment);
   }
 }
 

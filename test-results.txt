@@ -1,12 +1,16 @@
-13:53:01 [vite] warning: `esbuild` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `oxc` instead.
-13:53:01 [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+
+> edo-app@0.0.0 test
+> vitest run --no-color
+
+11:39:42 [vite] warning: `esbuild` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `oxc` instead.
+11:39:42 [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
 Both esbuild and oxc options were set. oxc options will be used and esbuild options will be ignored. The following esbuild options were set: `{ jsx: 'automatic', jsxImportSource: undefined }`
 
  RUN  v4.1.8 C:/Users/Батраз/Desktop/Учеба/Програмная инженерия 2 семестр/software-engineering-edo-app-master
 
 
- Test Files  1 passed (1)
-      Tests  9 passed (9)
-   Start at  13:53:01
-   Duration  345ms (transform 60ms, setup 0ms, import 86ms, tests 10ms, environment 0ms)
+ Test Files  2 passed (2)
+      Tests  12 passed (12)
+   Start at  11:39:42
+   Duration  388ms (transform 167ms, setup 0ms, import 231ms, tests 18ms, environment 0ms)
 

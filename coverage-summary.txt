@@ -1,27 +1,34 @@
-13:53:08 [vite] warning: `esbuild` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `oxc` instead.
-13:53:08 [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+﻿
+> edo-app@0.0.0 test:coverage
+> vitest run --coverage --no-color
+
+11:39:44 [vite] warning: `esbuild` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `oxc` instead.
+11:39:44 [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
 Both esbuild and oxc options were set. oxc options will be used and esbuild options will be ignored. The following esbuild options were set: `{ jsx: 'automatic', jsxImportSource: undefined }`
 
  RUN  v4.1.8 C:/Users/Батраз/Desktop/Учеба/Програмная инженерия 2 семестр/software-engineering-edo-app-master
       Coverage enabled with v8
 
 
- Test Files  1 passed (1)
-      Tests  9 passed (9)
-   Start at  13:53:08
-   Duration  362ms (transform 54ms, setup 0ms, import 80ms, tests 12ms, environment 0ms)
+ Test Files  2 passed (2)
+      Tests  12 passed (12)
+   Start at  11:39:44
+   Duration  538ms (transform 155ms, setup 0ms, import 221ms, tests 26ms, environment 0ms)
 
  % Coverage report from v8
 -------------------|---------|----------|---------|---------|-------------------
-File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
 -------------------|---------|----------|---------|---------|-------------------
-All files          |   97.05 |       90 |     100 |   96.96 |                   
- ...ovalService.ts |   97.05 |       90 |     100 |   96.96 | 83                
+All files          |   90.09 |    86.84 |     100 |    91.3 |
+ main/services     |   97.05 |       90 |     100 |   96.96 |
+  ...valService.ts |   97.05 |       90 |     100 |   96.96 | 83
+ ...sionComparison |   86.56 |    85.71 |     100 |   88.13 |
+  comparison.ts    |   86.56 |    85.71 |     100 |   88.13 | ...28-136,151-158
 -------------------|---------|----------|---------|---------|-------------------
 
 =============================== Coverage summary ===============================
-Statements   : 97.05% ( 33/34 )
-Branches     : 90% ( 9/10 )
-Functions    : 100% ( 11/11 )
-Lines        : 96.96% ( 32/33 )
+Statements   : 90.09% ( 91/101 )
+Branches     : 86.84% ( 33/38 )
+Functions    : 100% ( 18/18 )
+Lines        : 91.3% ( 84/92 )
 ================================================================================

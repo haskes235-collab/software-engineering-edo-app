@@ -191,129 +191,15 @@
   overflow: auto;
 }
 
-.detail-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.9fr);
-  gap: 24px;
-}
-
-.detail-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.detail-card {
-  padding: 28px;
-}
-
-.detail-card__header {
-  margin-bottom: 22px;
-}
-
-.detail-card__title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-}
-
-.detail-card__title h2,
-.detail-card__body h3 {
-  margin: 0;
-  color: #0f172a;
-}
-
-.detail-meta-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 18px;
-}
-
-.detail-meta-grid > div {
-  padding: 16px;
-  border-radius: 18px;
-  background: #f8fafc;
-}
-
-.detail-meta-grid__label {
-  display: block;
-  margin-bottom: 6px;
-  color: #64748b;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.detail-card__body {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.document-content-block {
-  padding: 18px;
-  border-radius: 20px;
-  background: #f8fafc;
-  border: 1px solid rgba(226, 232, 240, 0.85);
-}
-
-.document-content-block pre {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
-  color: #1e293b;
-  font-family: inherit;
-}
-
-.version-preview {
-  align-self: start;
-}
-
-.version-preview__meta {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  color: #475569;
-}
-
-.version-preview__note {
-  padding: 14px 16px;
-  border-radius: 16px;
-  color: #7c2d12;
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
-}
-
-.page-state {
-  padding: 48px 24px;
-  border-radius: 24px;
-  text-align: center;
-  color: #475569;
-  background: rgba(255, 255, 255, 0.84);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-}
-
-.page-state--error {
-  color: #b91c1c;
-}
-
 @media (max-width: 1080px) {
   .page-hero,
-  .toolbar-row,
-  .detail-grid {
+  .toolbar-row {
     grid-template-columns: 1fr;
     flex-direction: column;
   }
 
   .hero-metrics {
     width: 100%;
-  }
-
-  .detail-meta-grid {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -335,9 +221,5 @@
 
   .hero-metrics {
     grid-template-columns: 1fr;
-  }
-
-  .modal-backdrop {
-    padding: 16px;
   }
 }

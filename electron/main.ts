@@ -2,10 +2,18 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { IPC } from '../src/shared/ipcChannels';
-import { initDatabase, closeDatabase } from '../src/main/db/database';
-import { DocumentRepository } from '../src/main/repositories/DocumentRepository';
 import { DocumentService } from '../src/main/services/DocumentService';
-import { CreateDocumentDto, UpdateDocumentDto } from '../src/shared/types';
+import {
+  AddDocumentAttachmentDto,
+  ApprovalActor,
+  CreateDocumentDto,
+  UpdateDocumentDto,
+} from '../src/shared/types';
+import { initDatabase, closeDatabase } from '../src/main/db';
+import { DocumentRepository } from '@main/repositories/documentRepository/DocumentRepository';
+import { registerAuthHandlers } from '../src/main/ipc/handlers/authHandlers';
+import { FileStorageService } from '../src/main/services/FileStorageService';
+import { ApprovalService } from '../src/main/services/ApprovalService';
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -31,10 +39,12 @@ function createWindow(): void {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.mjs'),
     },
+    autoHideMenuBar: true,
   });
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
+    win.webContents.openDevTools();
   } else {
     win.loadFile(path.join(RENDERER_DIST, 'index.html'));
   }
@@ -44,6 +54,8 @@ async function registerIpcHandlers(): Promise<void> {
   const db = await initDatabase();
   const repository = new DocumentRepository(db);
   const service = new DocumentService(repository);
+  const fileStorageService = new FileStorageService(repository);
+  const approvalService = new ApprovalService(repository);
 
   ipcMain.handle(IPC.DOCUMENTS.GET_ALL, () => service.getAllDocuments());
   ipcMain.handle(IPC.DOCUMENTS.GET_BY_ID, (_, id: string) =>
@@ -56,12 +68,49 @@ async function registerIpcHandlers(): Promise<void> {
     IPC.DOCUMENTS.UPDATE,
     (_, id: string, dto: UpdateDocumentDto) => service.updateDocument(id, dto),
   );
+  ipcMain.handle(IPC.DOCUMENTS.RESTORE_VERSION, (_, id: string, versionNumber: number) =>
+    service.restoreDocumentVersion(id, versionNumber),
+  );
   ipcMain.handle(IPC.DOCUMENTS.DELETE, (_, id: string) =>
     service.deleteDocument(id),
   );
   ipcMain.handle(IPC.DOCUMENTS.GET_VERSIONS, (_, id: string) =>
     service.getDocumentVersions(id),
   );
+  ipcMain.handle(IPC.DOCUMENTS.GET_ATTACHMENTS, (_, id: string) =>
+    fileStorageService.getAttachments(id),
+  );
+  ipcMain.handle(
+    IPC.DOCUMENTS.ADD_ATTACHMENT,
+    (_, id: string, dto: AddDocumentAttachmentDto) =>
+      fileStorageService.addAttachment(id, dto),
+  );
+  ipcMain.handle(
+    IPC.DOCUMENTS.GET_ATTACHMENT_FILE,
+    (_, id: string, attachmentId: string) =>
+      fileStorageService.getAttachmentFile(id, attachmentId),
+  );
+  ipcMain.handle(
+    IPC.DOCUMENTS.DELETE_ATTACHMENT,
+    (_, id: string, attachmentId: string) =>
+      fileStorageService.deleteAttachment(id, attachmentId),
+  );
+  ipcMain.handle(
+    IPC.APPROVAL.SUBMIT,
+    (_, id: string, actor: ApprovalActor, comment?: string) =>
+      approvalService.submitForApproval(id, actor, comment),
+  );
+  ipcMain.handle(
+    IPC.APPROVAL.APPROVE,
+    (_, id: string, actor: ApprovalActor, comment?: string) =>
+      approvalService.approveDocument(id, actor, comment),
+  );
+  ipcMain.handle(
+    IPC.APPROVAL.REJECT,
+    (_, id: string, actor: ApprovalActor, comment?: string) =>
+      approvalService.rejectDocument(id, actor, comment),
+  );
+  registerAuthHandlers(db);
 }
 
 app.on('window-all-closed', () => {
@@ -78,8 +127,12 @@ app.on('activate', () => {
 });
 
 app.whenReady().then(async () => {
-  await registerIpcHandlers();
-  createWindow();
+    try {
+        await registerIpcHandlers();
+        createWindow();
+    } catch (e) {
+        console.error(e);
+    }
 });
 
 app.on('will-quit', () => closeDatabase());

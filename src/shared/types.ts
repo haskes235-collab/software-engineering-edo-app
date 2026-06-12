@@ -24,6 +24,19 @@ export interface DocumentVersion {
   changeNote: string;
 }
 
+export interface DocumentAttachment {
+  id: string;
+  documentId: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
+  createdAt: string;
+}
+
+export interface DocumentAttachmentFile extends DocumentAttachment {
+  data: ArrayBuffer | Uint8Array;
+}
+
 export interface CreateDocumentDto {
   title: string;
   content: string;
@@ -35,6 +48,13 @@ export interface UpdateDocumentDto {
   title?: string;
   content?: string;
   changeNote: string;
+}
+
+export interface AddDocumentAttachmentDto {
+  fileName: string;
+  mimeType: string;
+  size: number;
+  data: ArrayBuffer;
 }
 
 export interface ApprovalActor {
@@ -56,4 +76,34 @@ export interface ApprovalResult {
   previousStatus: DocStatus;
   nextStatus: DocStatus;
   comment?: ApprovalComment;
+}
+
+export interface User {
+  id: number;
+  email: string,
+  name: string,
+  password: string // hashed
+  createdAt: string;
+}
+
+export interface LoginDTO {
+  email: string,
+  password: string;
+}
+
+export interface RegisterDTO {
+  email: string,
+  password: string,
+  name: string;
+}
+
+export interface AuthResponse {
+  user: Omit<User, 'password'>;
+  token: string;
+}
+
+export interface CurrentUser {
+  id: number;
+  email: string;
+  name: string;
 }

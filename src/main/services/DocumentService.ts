@@ -1,4 +1,4 @@
-import { IDocumentRepository } from '../repositories/IDocumentRepository';
+import { IDocumentRepository } from '@main/repositories/documentRepository/IDocumentRepository';
 import {
   Document,
   DocumentVersion,
@@ -34,6 +34,21 @@ export class DocumentService {
       throw new Error('A change note is required when editing a document');
     }
     return this.repository.update(id, dto);
+  }
+
+  restoreDocumentVersion(id: string, versionNumber: number): Document {
+    const existing = this.getDocumentById(id);
+    if (existing.status !== 'DRAFT') {
+      throw new Error('Only DRAFT documents can be restored from version history');
+    }
+
+    const version = this.repository.getVersionByNumber(id, versionNumber);
+    if (!version) {
+      throw new Error(`Version not found: ${versionNumber} for document ${id}`);
+    }
+
+    const changeNote = `Восстановлена версия v${versionNumber}`;
+    return this.repository.restoreVersion(id, versionNumber, changeNote);
   }
 
   deleteDocument(id: string): void {
