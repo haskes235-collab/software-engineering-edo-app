@@ -24,6 +24,7 @@ export class DocumentDetailPageController {
   attachmentError: string | null = null;
   approvalRole: UserRole = 'MANAGER';
   approvalInProgress = false;
+  approvalError: string | null = null;
 
   private documentId: string;
 
@@ -182,6 +183,7 @@ export class DocumentDetailPageController {
 
   setApprovalRole(role: UserRole): void {
     this.approvalRole = role;
+    this.setApprovalError(null);
   }
 
   openEditDialog(): void {
@@ -212,6 +214,10 @@ export class DocumentDetailPageController {
     this.attachmentError = error;
   }
 
+  private setApprovalError(error: string | null): void {
+    this.approvalError = error;
+  }
+
   private setUploadingAttachment(value: boolean): void {
     this.uploadingAttachment = value;
   }
@@ -224,13 +230,13 @@ export class DocumentDetailPageController {
     action: (comment?: string) => Promise<unknown>,
   ): Promise<void> {
     this.setApprovalInProgress(true);
-    this.setError(null);
+    this.setApprovalError(null);
 
     try {
       await action();
       await this.loadDocumentData();
     } catch (err) {
-      this.setError(this.extractErrorMessage(err));
+      this.setApprovalError(this.extractErrorMessage(err));
     } finally {
       this.setApprovalInProgress(false);
     }
@@ -265,6 +271,17 @@ export class DocumentDetailPageController {
   }
 
   private extractErrorMessage(err: unknown): string {
-    return err instanceof Error ? err.message : 'Неизвестная ошибка';
+    if (!(err instanceof Error)) return 'Неизвестная ошибка';
+
+    const message = err.message.replace(/^Error invoking remote method '[^']+':\s*/, '');
+    if (
+      message.includes(
+        'UNIQUE constraint failed: document_versions.document_id, document_versions.version_number',
+      )
+    ) {
+      return 'Не удалось записать историю изменения статуса: номер версии уже существует.';
+    }
+
+    return message;
   }
 }

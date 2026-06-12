@@ -22,7 +22,7 @@ export const DocumentDetailPageView = observer(function DocumentDetailPageView({
     );
   }
 
-  if (controller.error || !controller.document) {
+  if (!controller.document) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center rounded-3xl border border-rose-200 bg-rose-50 px-6 py-12 text-center text-rose-700 shadow-lg">
         Ошибка: {controller.error ?? 'Документ не найден'}
@@ -157,6 +157,12 @@ export const DocumentDetailPageView = observer(function DocumentDetailPageView({
             )}
           </div>
         </div>
+
+        {controller.approvalError && (
+          <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+            {controller.approvalError}
+          </div>
+        )}
       </section>
 
       <div className="grid gap-6 xl:grid-cols-12">
