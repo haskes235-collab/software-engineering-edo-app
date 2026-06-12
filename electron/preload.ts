@@ -2,6 +2,8 @@ import { contextBridge, ipcRenderer } from 'electron';
 import { AUTH_CHANNELS, IPC } from '../src/shared/ipcChannels';
 import {
   AddDocumentAttachmentDto,
+  ApprovalActor,
+  ApprovalResult,
   CreateDocumentDto,
   LoginDTO,
   RegisterDTO,
@@ -29,6 +31,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke(IPC.DOCUMENTS.GET_ATTACHMENT_FILE, id, attachmentId),
     deleteAttachment: (id: string, attachmentId: string) =>
       ipcRenderer.invoke(IPC.DOCUMENTS.DELETE_ATTACHMENT, id, attachmentId),
+  },
+  approval: {
+    submit: (id: string, actor: ApprovalActor, comment?: string): Promise<ApprovalResult> =>
+      ipcRenderer.invoke(IPC.APPROVAL.SUBMIT, id, actor, comment),
+    approve: (id: string, actor: ApprovalActor, comment?: string): Promise<ApprovalResult> =>
+      ipcRenderer.invoke(IPC.APPROVAL.APPROVE, id, actor, comment),
+    reject: (id: string, actor: ApprovalActor, comment?: string): Promise<ApprovalResult> =>
+      ipcRenderer.invoke(IPC.APPROVAL.REJECT, id, actor, comment),
   },
   auth: {
     login: (dto: LoginDTO) => ipcRenderer.invoke(AUTH_CHANNELS.LOGIN, dto),

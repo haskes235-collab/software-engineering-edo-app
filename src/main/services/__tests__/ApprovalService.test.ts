@@ -143,6 +143,12 @@ const manager: ApprovalActor = {
   role: 'MANAGER',
 };
 
+const administrator: ApprovalActor = {
+  id: 'user-admin',
+  name: 'Administrator',
+  role: 'ADMINISTRATOR',
+};
+
 function createDocument(status: DocStatus): Document {
   return {
     id: 'document-1',
@@ -182,6 +188,14 @@ describe('ApprovalService', () => {
 
     expect(result.previousStatus).toBe('PENDING');
     expect(result.nextStatus).toBe('APPROVED');
+    expect(result.document.status).toBe('APPROVED');
+  });
+
+  it('allows an administrator to approve a pending document', () => {
+    repository.seed(createDocument('PENDING'));
+
+    const result = service.approveDocument('document-1', administrator);
+
     expect(result.document.status).toBe('APPROVED');
   });
 

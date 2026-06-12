@@ -1,5 +1,5 @@
 import { Buffer } from 'node:buffer';
-import { eq, and, desc, isNull } from 'drizzle-orm';
+import { eq, and, desc, isNull, sql } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { IDocumentRepository } from './IDocumentRepository';
 import {
@@ -307,11 +307,13 @@ export class DocumentRepository implements IDocumentRepository {
 
   private getNextVersionNumber(documentId: string): number {
     const result = this.db
-      .select({ max: documentVersions.versionNumber })
+      .select({
+        next: sql<number>`COALESCE(MAX(${documentVersions.versionNumber}), 0) + 1`,
+      })
       .from(documentVersions)
       .where(eq(documentVersions.documentId, documentId))
       .get();
 
-    return (result?.max ?? 0) + 1;
+    return result?.next ?? 1;
   }
 }

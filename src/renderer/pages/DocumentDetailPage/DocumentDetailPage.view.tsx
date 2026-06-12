@@ -22,7 +22,7 @@ export const DocumentDetailPageView = observer(function DocumentDetailPageView({
     );
   }
 
-  if (controller.error || !controller.document) {
+  if (!controller.document) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center rounded-3xl border border-rose-200 bg-rose-50 px-6 py-12 text-center text-rose-700 shadow-lg">
         Ошибка: {controller.error ?? 'Документ не найден'}
@@ -84,8 +84,61 @@ export const DocumentDetailPageView = observer(function DocumentDetailPageView({
             Назад к списку
           </button>
 
-          {controller.isDraft && (
-            <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            {(controller.isDraft || controller.isPending) && (
+              <>
+                <label className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
+                  Роль для согласования
+                  <select
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal text-slate-900"
+                    value={controller.approvalRole}
+                    onChange={(event) =>
+                      controller.setApprovalRole(event.target.value as typeof controller.approvalRole)
+                    }
+                    disabled={controller.approvalInProgress}
+                  >
+                    <option value="EMPLOYEE">Сотрудник</option>
+                    <option value="MANAGER">Руководитель</option>
+                    <option value="ADMINISTRATOR">Администратор</option>
+                  </select>
+                </label>
+
+                {controller.isDraft && (
+                  <button
+                    className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-teal-600 to-emerald-700 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-950/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                    type="button"
+                    disabled={controller.approvalInProgress}
+                    onClick={() => void controller.submitForApproval()}
+                  >
+                    Отправить на согласование
+                  </button>
+                )}
+
+                {controller.isPending && (
+                  <>
+                    <button
+                      className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-emerald-600 to-green-700 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-green-950/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                      type="button"
+                      disabled={controller.approvalInProgress}
+                      onClick={() => void controller.approveDocument()}
+                    >
+                      Утвердить
+                    </button>
+                    <button
+                      className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-600 to-orange-700 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-950/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                      type="button"
+                      disabled={controller.approvalInProgress || !controller.isPending}
+                      onClick={() => void controller.rejectDocument()}
+                    >
+                      Отклонить
+                    </button>
+                  </>
+                )}
+              </>
+            )}
+
+            {controller.isDraft && (
+              <>
               <button
                 className="inline-flex items-center justify-center rounded-xl bg-slate-200 px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-300"
                 type="button"
@@ -100,9 +153,49 @@ export const DocumentDetailPageView = observer(function DocumentDetailPageView({
               >
                 Удалить
               </button>
-            </div>
-          )}
+              </>
+            )}
+          </div>
         </div>
+
+        {controller.approvalError && (
+          <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+            {controller.approvalError}
+          </div>
+        )}
+
+        {controller.isRejectDialogOpen && (
+          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
+            <label className="flex flex-col gap-2 text-sm font-medium text-amber-950">
+              Причина отклонения
+              <textarea
+                className="min-h-24 rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm font-normal text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+                value={controller.rejectComment}
+                onChange={(event) => controller.setRejectComment(event.target.value)}
+                disabled={controller.approvalInProgress}
+                placeholder="Комментарий можно оставить пустым"
+              />
+            </label>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <button
+                className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                type="button"
+                disabled={controller.approvalInProgress}
+                onClick={() => controller.cancelRejectDocument()}
+              >
+                Отмена
+              </button>
+              <button
+                className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-600 to-orange-700 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-orange-950/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                type="button"
+                disabled={controller.approvalInProgress}
+                onClick={() => void controller.confirmRejectDocument()}
+              >
+                Подтвердить отклонение
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       <div className="grid gap-6 xl:grid-cols-12">

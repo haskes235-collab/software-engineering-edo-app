@@ -1,5 +1,7 @@
 import {
   AddDocumentAttachmentDto,
+  ApprovalActor,
+  ApprovalResult,
   AuthResponse,
   CurrentUser,
   Document,
@@ -35,6 +37,11 @@ declare global {
         addAttachment(id: string, dto: AddDocumentAttachmentDto): Promise<DocumentAttachment>;
         getAttachmentFile(id: string, attachmentId: string): Promise<DocumentAttachmentFile>;
         deleteAttachment(id: string, attachmentId: string): Promise<void>;
+      };
+      approval: {
+        submit(id: string, actor: ApprovalActor, comment?: string): Promise<ApprovalResult>;
+        approve(id: string, actor: ApprovalActor, comment?: string): Promise<ApprovalResult>;
+        reject(id: string, actor: ApprovalActor, comment?: string): Promise<ApprovalResult>;
       };
       auth: {
         login: (dto: LoginDTO) => Promise<AuthResponse | ApiErrorResponse>;

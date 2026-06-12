@@ -12,6 +12,11 @@ export const IPC = {
     GET_ATTACHMENT_FILE: 'documents:getAttachmentFile',
     DELETE_ATTACHMENT: 'documents:deleteAttachment',
   },
+  APPROVAL: {
+    SUBMIT: 'approval:submit',
+    APPROVE: 'approval:approve',
+    REJECT: 'approval:reject',
+  },
 } as const;
 
 export const AUTH_CHANNELS = {

@@ -3,11 +3,17 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { IPC } from '../src/shared/ipcChannels';
 import { DocumentService } from '../src/main/services/DocumentService';
-import { AddDocumentAttachmentDto, CreateDocumentDto, UpdateDocumentDto } from '../src/shared/types';
+import {
+  AddDocumentAttachmentDto,
+  ApprovalActor,
+  CreateDocumentDto,
+  UpdateDocumentDto,
+} from '../src/shared/types';
 import { initDatabase, closeDatabase } from '../src/main/db';
 import { DocumentRepository } from '@main/repositories/documentRepository/DocumentRepository';
 import { registerAuthHandlers } from '../src/main/ipc/handlers/authHandlers';
 import { FileStorageService } from '../src/main/services/FileStorageService';
+import { ApprovalService } from '../src/main/services/ApprovalService';
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -49,6 +55,7 @@ async function registerIpcHandlers(): Promise<void> {
   const repository = new DocumentRepository(db);
   const service = new DocumentService(repository);
   const fileStorageService = new FileStorageService(repository);
+  const approvalService = new ApprovalService(repository);
 
   ipcMain.handle(IPC.DOCUMENTS.GET_ALL, () => service.getAllDocuments());
   ipcMain.handle(IPC.DOCUMENTS.GET_BY_ID, (_, id: string) =>
@@ -87,6 +94,21 @@ async function registerIpcHandlers(): Promise<void> {
     IPC.DOCUMENTS.DELETE_ATTACHMENT,
     (_, id: string, attachmentId: string) =>
       fileStorageService.deleteAttachment(id, attachmentId),
+  );
+  ipcMain.handle(
+    IPC.APPROVAL.SUBMIT,
+    (_, id: string, actor: ApprovalActor, comment?: string) =>
+      approvalService.submitForApproval(id, actor, comment),
+  );
+  ipcMain.handle(
+    IPC.APPROVAL.APPROVE,
+    (_, id: string, actor: ApprovalActor, comment?: string) =>
+      approvalService.approveDocument(id, actor, comment),
+  );
+  ipcMain.handle(
+    IPC.APPROVAL.REJECT,
+    (_, id: string, actor: ApprovalActor, comment?: string) =>
+      approvalService.rejectDocument(id, actor, comment),
   );
   registerAuthHandlers(db);
 }
